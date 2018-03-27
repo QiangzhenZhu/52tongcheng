@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorMainBackground">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="46dip" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="17dp"
+            android:text="@string/tv_user_message_title"
+            android:textColor="@color/colorTextWhite"
+            android:background="@color/colorTheme"/>
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+
+        android:orientation="vertical">
+        <!-- TODO: Update blank fragment layout -->
+        <LinearLayout
+            android:id="@+id/circle_phone_friend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/colorTextWhite"
+
+            android:padding="5dp">
+
+            <ImageView
+                android:id="@+id/phone_friend_iv"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:scaleType="fitXY"
+                android:layout_marginLeft="20dp"
+                android:src="@mipmap/friend_ic_add"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="5dp"
+                android:text="添加好友" />
+        </LinearLayout>
+        <include layout="@layout/line" />
+        <LinearLayout
+            android:id="@+id/circle_nearby"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+
+            android:background="@color/colorTextWhite"
+            android:padding="5dp">
+
+            <ImageView
+                android:id="@+id/circle_nearby_iv"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="20dp"
+                android:background="@mipmap/friend_ic_near" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="5dp"
+                android:text="搜索附近朋友" />
+        </LinearLayout>
+
+        <!--<include layout="@layout/line" />-->
+        <!--<LinearLayout-->
+            <!--android:id="@+id/circle_friend"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="horizontal"-->
+
+            <!--android:background="@color/colorTextWhite"-->
+            <!--android:padding="5dp">-->
+
+            <!--<ImageView-->
+                <!--android:id="@+id/circle_friend_iv"-->
+                <!--android:layout_width="30dp"-->
+                <!--android:layout_height="30dp"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:background="@mipmap/friend_ic_group" />-->
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:layout_marginLeft="5dp"-->
+                <!--android:text="我的好友" />-->
+        <!--</LinearLayout>-->
+
+        <include layout="@layout/line" />
+        <!--<FrameLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_marginTop="10dip"-->
+        <!--android:background="@color/colorTextWhite">-->
+
+
+
+        <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+        <!--&lt;!&ndash;android:id="@+id/noResult"&ndash;&gt;-->
+        <!--&lt;!&ndash;style="@style/ContactItemHeader"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:text="@string/contact_no_result"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:visibility="gone" />&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+        <!--&lt;!&ndash;android:id="@+id/anno"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_height="80dp"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_gravity="center"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:alpha="0.5"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:gravity="center"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:text="@string/no_friend"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:textColor="@color/black_translucent"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:textSize="@dimen/font33px" />&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<cn.xcom.banjing.view.SideBar&ndash;&gt;-->
+        <!--&lt;!&ndash;android:id="@+id/sideBar"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_width="30dp"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_height="match_parent"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_gravity="end|center"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:visibility="gone" />&ndash;&gt;-->
+        <!--</FrameLayout>-->
+    </LinearLayout>
+    <com.jcodecraeer.xrecyclerview.XRecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.jcodecraeer.xrecyclerview.XRecyclerView>
+</LinearLayout>
+

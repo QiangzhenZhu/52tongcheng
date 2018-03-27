@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ad_vedio_background"
+    android:src="@drawable/ic_bofang"
+    android:tileMode="disabled" android:gravity="top" >
+</bitmap>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5"
+    tools:context="cn.xcom.banjing.activity.PointsActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="220dp">
+        <FrameLayout
+            android:id="@+id/fl_black_title"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:background="#1A1A1A"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true">
+
+        </FrameLayout>
+        <FrameLayout
+            android:id="@+id/fl_dark_white_title"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@id/fl_black_title"
+            android:background="#DADADA">
+        </FrameLayout>
+        <include layout="@layout/points_content_include"
+            android:layout_height="80dp"
+            android:layout_width="280dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="130dp"
+            >
+        </include>
+
+        <cn.xcom.banjing.utils.RoundImageView
+            android:id="@+id/ri_points"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:id="@+id/tv_points_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ri_points"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="12dp"
+            android:text="姓名"
+            android:textSize="16sp"
+            android:textColor="#ffffff"
+            />
+        <ImageView
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:id="@+id/iv_back"
+            android:src="@drawable/back_off_c1"
+            android:layout_width="20dp"
+            android:layout_height="20dp" />
+    </RelativeLayout>
+    <com.jcodecraeer.xrecyclerview.XRecyclerView
+        android:background="#ffffff"
+        android:id="@+id/rv_points"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </com.jcodecraeer.xrecyclerview.XRecyclerView>
+
+
+
+</LinearLayout>

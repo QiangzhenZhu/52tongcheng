@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/driver"
+    tools:context="cn.xcom.banjing.activity.SearchFriendActivity">
+    <cn.xcom.banjing.view.ClearEditText
+        android:id="@+id/filter_edit"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_marginTop="@dimen/activity_half_margin"
+        android:background="@drawable/search_bar_edit_selector"
+        android:drawableLeft="@drawable/search_bar_icon_normal_"
+        android:drawableStart="@drawable/search_bar_icon_normal_"
+        android:gravity="center"
+        android:imeOptions="actionSearch"
+        android:hint="姓名、手机号码"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:singleLine="true"
+        android:textColorHint="@color/bottom_text_black"
+        android:textSize="@dimen/contact_edit_font_size" />
+    <com.jcodecraeer.xrecyclerview.XRecyclerView
+        android:id="@+id/search_friend_xrv"
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.jcodecraeer.xrecyclerview.XRecyclerView>
+</LinearLayout>

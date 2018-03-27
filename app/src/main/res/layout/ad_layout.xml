@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/background_white"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:id="@+id/image_"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <!--<cn.xcom.banjing.utils.NoScrollGridView-->
+            <!--android:id="@+id/gridview"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:horizontalSpacing="10dp"-->
+            <!--android:numColumns="3"-->
+            <!--android:verticalSpacing="10dp">-->
+            <!--</cn.xcom.banjing.utils.NoScrollGridView>-->
+
+            <ImageView
+                android:id="@+id/title_img"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_gravity="center"
+            android:layout_width="75dp"
+            android:layout_height="75dp">
+            <ImageView
+                android:id="@+id/back_img"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                />
+        </FrameLayout>
+    </FrameLayout>
+
+    <TextView
+        android:layout_marginTop="8dp"
+        android:id="@+id/ev_ad_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:editable="false" />
+
+    <RelativeLayout
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <cn.xcom.banjing.utils.RoundImageView
+            android:id="@+id/convenience_photo"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginRight="10dp"
+            android:src="@mipmap/bg_img_none" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/convenience_photo">
+
+            <LinearLayout
+                android:id="@+id/ll_convenience_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="5dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/convenience_phone"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginRight="5dp"
+                    android:src="@mipmap/ad_btn_rmoney_take" />
+
+                <TextView
+                    android:id="@+id/tv_packet_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/packet_begin_count"
+                    android:textColor="@color/orange" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/red_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/ll_convenience_phone"
+                android:layout_marginRight="16dp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:src="@mipmap/tabbar_btn_money_pay"/>
+                <TextView
+                    android:id="@+id/touched_red_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:layout_toLeftOf="@id/red_count"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/iv_like"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginRight="5dp"
+                    android:src="@mipmap/ad_btn_praise" />
+                <TextView
+                    android:id="@+id/tv_like_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/convenience_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/ll_like"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="姓名"
+                android:textColor="@color/colorTheme"
+                android:textSize="12sp" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+</LinearLayout>

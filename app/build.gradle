@@ -1,0 +1,140 @@
+apply plugin: 'com.android.application'
+//apply plugin: 'com.android.application'
+//apply plugin: 'com.neenbedankt.android-apt'//增加这一句
+//apply plugin: 'com.android.library'
+apply plugin: 'com.jakewharton.butterknife'
+//apply plugin: 'org.greenrobot.greendao'
+android {
+    signingConfigs {
+        zhuzhenqiang {
+            keyAlias 'key0'
+            keyPassword '123456'
+            storeFile file('E:/release/zhuzhenqiang.jks')
+            storePassword '123456'
+        }
+    }
+    compileSdkVersion 25
+    buildToolsVersion '26.0.2'
+    defaultConfig {
+        applicationId "cn.xcom.banjing"
+        minSdkVersion 16
+        targetSdkVersion 22
+        versionCode 14
+        versionName "4.0"
+        multiDexEnabled true
+        flavorDimensions "versionCode"
+
+    }
+    useLibrary 'org.apache.http.legacy'
+    lintOptions {
+        checkReleaseBuilds false
+    }
+    //应用 Bugtags 插件
+//    apply plugin: 'com.bugtags.library.plugin'
+//    //Bugtags 插件配置
+//    bugtags {
+//        //自动上传符号表功能配置，如果需要根据 build varint 配置，请参考帮助中心->符号表->Android 符号表->配置自动上传符号表
+//        appKey "a0bfbbf506442a8f5ba633c758385d3c"  //这里是你的 appKey
+//
+//        appSecret "44a7cbccd4e1678d420c23e8cc5d3446"    //这里是你的 appSecret，管理员在设置页可以查看
+//        mappingUploadEnabled true
+//
+//        //网络跟踪功能配置(企业版)
+//        //trackingNetworkEnabled true
+//    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            signingConfig signingConfigs.release
+//            debuggable true
+//            jniDebuggable true
+//            renderscriptDebuggable true
+//            pseudoLocalesEnabled true
+            signingConfig signingConfigs.zhuzhenqiang
+        }
+        debug {
+            signingConfig signingConfigs.zhuzhenqiang
+        }
+        debugTest {
+        }
+    }
+    sourceSets {
+        main {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs = ['src/main/java']
+            res.srcDirs = ['src/main/res']
+            jniLibs.srcDirs = ['libs']
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/maven/com.squareup.picasso/picasso/pom.xml'
+        exclude 'META-INF/maven/com.squareup.picasso/picasso/pom.properties'
+
+    }
+}
+
+
+
+
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile project(':zzq')
+    testCompile 'junit:junit:4.12'
+    //    compile files('libs/universal-image-loader-1.9.5.jar')
+    compile files('libs/BaiduLBS_Android.jar')
+    compile files('libs/org.apache.http.legacy.jar')
+    compile files('libs/parse-android-1.13.0.jar')
+    compile files('libs/bolts-tasks-1.4.0.jar')
+    compile files('libs/redpacket2.0.jar')
+    compile files('libs/gson-2.2.4.jar')
+    compile files('libs/Volley.jar')
+    //noinspection GradleCompatible
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:recyclerview-v7:25.3.0'
+    compile 'com.android.support:support-v4:25.3.0'
+    compile 'com.android.support:design:25.3.0'
+    compile 'com.loopj.android:android-async-http:1.4.9'
+    compile 'com.jcodecraeer:xrecyclerview:1.2.7'
+    compile 'com.kyleduo.switchbutton:library:1.4.6'
+    compile 'cn.finalteam:galleryfinal:1.4.8.7'
+    compile 'com.baoyz.actionsheet:library:1.1.4'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile files('libs/alipaySdk-20160825.jar')
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+    //    compile 'com.jakewharton:butterknife:8.8.1'
+    //    apt 'com.jakewharton:butterknife-compiler:8.8.1'
+    ////    annotationProcessor 'com.jakewharton:butterknife-compiler:8.1.0'
+    compile 'com.jakewharton:butterknife:8.4.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+    compile 'com.lzy.widget:view-core:0.2.1'
+    compile files('libs/jpush-android-2.1.9.jar')
+    compile files('libs/pinyin4j-2.5.0.jar')
+    compile 'com.bigkoo:alertview:1.0.3'
+    //    //仿ios弹出框
+    compile 'com.feezu.liuli:timeselector:1.0.8+'
+    //仿ios时间选择器
+    compile 'com.tencent.bugly:crashreport:latest.release'
+    //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.1.9
+    compile files('libs/libapshare.jar')
+    compile files('libs/open_sdk_r5756_lite.jar')
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.kaopiz:kprogresshud:1.0.5'
+    compile 'com.czt.mp3recorder:library:1.0.4'
+    compile 'fm.jiecao:jiecaovideoplayer:4.8.3'
+    compile 'com.android.support:cardview-v7:25.0.1'
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.github.LuckSiege.PictureSelector:picture_library:v1.5.5'
+    compile project(':mediapicker')
+    compile 'com.timehop.stickyheadersrecyclerview:library:0.4.3'
+    compile 'com.zhy:autolayout:1.4.5'
+    compile 'com.lqr.emoji:library:1.0.2'
+    compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
+    compile 'com.zhy:okhttputils:2.6.2'
+    compile 'com.github.hotchemi:permissionsdispatcher:2.3.0'
+    compile 'com.jude:rollviewpager:1.4.6'
+    compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
+    compile files('libs/pldroid-player-2.0.6.jar')
+}

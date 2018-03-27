@@ -1,0 +1,31 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+
+    <dimen name="side_letter_bar_letter_size">12sp</dimen>
+    <dimen name="side_letter_bar_width">36dp</dimen>
+    <dimen name="city_text_size">16sp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="sp_txt_size_content">14sp</dimen>
+
+
+    <dimen name="view_small_padding">1dp</dimen>
+    <dimen name="view_padding">6dp</dimen>
+    <!--音序选中提示-->
+    <dimen name="contact_anno_font">30sp</dimen>
+    <dimen name="activity_half_margin">8dp</dimen>
+    <dimen name="activity_small_margin">4dp</dimen>
+    <!--搜索栏-->
+    <dimen name="contact_edit_font_size">15sp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="title_size">17sp</dimen>
+    <dimen name="sub_title_size">16sp</dimen>
+    <dimen name="text_size">15sp</dimen>
+    <!--列表标题-->
+    <dimen name="contact_item_header_height">20dp</dimen>
+    <dimen name="contact_item_header_font">12sp</dimen>
+    <dimen name="ad_image_height">210dp</dimen>
+</resources>

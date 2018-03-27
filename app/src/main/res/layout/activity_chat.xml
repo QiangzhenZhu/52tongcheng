@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/root_view"
+    android:background="#EEEEEE"
+    android:orientation="vertical">
+    <!--Error:Execution failed for task ':app:processDebugManifest'.
+    > Manifest merger failed : Attribute meta-data#android.support.VERSION@value value=(25.3.1) from [com.android.support:design:25.3.1] AndroidManifest.xml:27:9-31
+        is also present at [com.android.support:appcompat-v7:26.0.0-alpha1] AndroidManifest.xml:27:9-38 value=(26.0.0-alpha1).
+        Suggestion: add 'tools:replace="android:value"' to <meta-data> element at AndroidManifest.xml:25:5-27:34 to override.-->
+    <include layout="@layout/common_app_bar" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recylerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!--聊天控件-->
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120px"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/voice"
+            android:layout_width="70px"
+            android:layout_height="70px"
+            android:layout_margin="10px"
+            android:background="@drawable/ic_cheat_voice" />
+
+        <com.zhy.autolayout.AutoRelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <io.github.rockerhieu.emojicon.EmojiconEditText
+                android:id="@+id/et_face_text_emotion"
+                android:layout_width="match_parent"
+                android:layout_height="80px"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@null"
+                android:drawableBottom="@drawable/selector_edit_focus"
+                android:visibility="visible" />
+
+
+        </com.zhy.autolayout.AutoRelativeLayout>
+
+        <TextView
+            android:id="@+id/emotion"
+            android:layout_width="70px"
+            android:layout_height="70px"
+            android:layout_margin="10px"
+            android:background="@drawable/ic_cheat_emo" />
+
+        <ImageView
+            android:id="@+id/ivMore"
+            android:layout_width="70px"
+            android:layout_height="70px"
+            android:layout_marginLeft="10px"
+            android:layout_marginRight="14px"
+            android:src="@drawable/ic_cheat_add" />
+
+        <Button
+            android:id="@+id/btn_send_msg"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="86px"
+            android:layout_height="70px"
+            android:layout_marginRight="8px"
+            android:background="@drawable/shape_session_btn_send"
+            android:text="@string/send"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:visibility="gone" />
+    </com.zhy.autolayout.AutoLinearLayout>
+
+    <com.example.mylibrary.RecordAudioView.QRecordAudioView
+        android:id="@+id/recordVoiceView"
+        android:layout_width="match_parent"
+        android:layout_height="270dp"
+        android:visibility="gone" />
+    <com.example.mylibrary.RecordAudioView.PlayRecordAudioView
+        android:id="@+id/playVoiceView"
+        android:layout_width="match_parent"
+        android:layout_height="270dp"
+        android:visibility="gone" />
+    <!--表情区-->
+    <com.lqr.emoji.EmotionLayout
+        android:id="@+id/elEmotion"
+        android:layout_width="match_parent"
+        android:layout_height="270dp"
+        android:visibility="gone" />
+
+    <!--<com.zhy.autolayout.AutoFrameLayout-->
+    <!--android:id="@+id/flEmotionView"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:minHeight="350px"-->
+    <!--android:visibility="gone">-->
+    <!--表情-->
+    <!--<com.lqr.emoji.EmotionLayout-->
+    <!--android:id="@+id/elEmotion"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:visibility="gone"-->
+    <!--/>-->
+    <!--其他功能-->
+    <include
+        android:id="@+id/llMore"
+        layout="@layout/include_func_layout"
+        android:visibility="gone" />
+    <!--</com.zhy.autolayout.AutoFrameLayout>-->
+
+
+</LinearLayout>
