@@ -30,6 +30,19 @@
                 android:contentDescription="@string/app_name"
                 android:src="@mipmap/ic_back_white_left" />
         </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/rl_help_me_order"
+            android:layout_width="50dip"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:layout_alignParentRight="true">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@mipmap/user_ic_account"
+
+                />
+        </RelativeLayout>
     </RelativeLayout>
 
     <ScrollView

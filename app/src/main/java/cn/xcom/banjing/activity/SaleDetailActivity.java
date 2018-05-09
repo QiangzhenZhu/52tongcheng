@@ -412,6 +412,8 @@ public class SaleDetailActivity extends BaseActivity implements View.OnClickList
      * 微信分享网页
      */
     private void shareWX() {
+        HelperApplication.shareType = 1;
+        HelperApplication.refid = Integer.parseInt(goodsId);
         //创建一个WXWebPageObject对象，用于封装要发送的Url
         WXWebpageObject webpage = new WXWebpageObject();
         webpage.webpageUrl = NetConstant.SHARE_SHOP_H5 + userInfo.getUserId();
@@ -632,6 +634,8 @@ public class SaleDetailActivity extends BaseActivity implements View.OnClickList
 
 
     private void shareToQQ() {
+        HelperApplication.shareType = 1;
+        HelperApplication.refid = Integer.parseInt(goodsId);
         Bundle params = new Bundle();
         params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
         params.putString(QQShare.SHARE_TO_QQ_TITLE, ShareHelper.MarketShareTitle);
@@ -643,6 +647,8 @@ public class SaleDetailActivity extends BaseActivity implements View.OnClickList
     }
 
     private void shareToQzone() {
+        HelperApplication.shareType = 1;
+        HelperApplication.refid = Integer.parseInt(goodsId);
         Bundle params = new Bundle();
         //分享类型
         params.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE, SHARE_TO_QZONE_TYPE_IMAGE_TEXT);
@@ -689,5 +695,11 @@ public class SaleDetailActivity extends BaseActivity implements View.OnClickList
     protected void onDestroy() {
         super.onDestroy();
         HelperApplication.getInstance().saleBack = true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mTencent.onActivityResult(requestCode, resultCode, data);
     }
 }

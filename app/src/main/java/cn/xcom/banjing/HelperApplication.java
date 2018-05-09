@@ -58,7 +58,9 @@ public class HelperApplication extends Application {
     //实时定位坐标和地址
     public double mLocLat, mLocLon;
     public String mLocAddress;
-
+    public String mProvince;
+    public String mArea;
+    public String city;
     //支付相关参数
     public String tradeNo;
     public String payType;
@@ -101,6 +103,10 @@ public class HelperApplication extends Application {
      * 把全国的省市区的信息以json的格式保存
      */
     public static JSONObject mCityJson;
+
+
+    public static int shareType;//分享的类型 1商品，2广告
+    public static int refid;//广告的refid 商品的refid
 
 
     @Override

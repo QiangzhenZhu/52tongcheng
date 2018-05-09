@@ -35,7 +35,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!-- Optional for location -->
+    <!-- Optional locationBasetion -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
@@ -346,7 +346,7 @@
             android:name=".service.OrderService"
             android:enabled="true"
             android:exported="true" />
-
+        <!--//是否无用-->
         <receiver android:name=".service.AlarmReceiver">
             <intent-filter>
                 <action android:name="ELITOR_CLOCK" />
@@ -379,8 +379,8 @@
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity android:name=".activity.AuthenticateMoneyActivity" />
         <activity android:name=".activity.DisplayAdViewPagerActivivty" />
-        <activity android:name=".activity.PointsActivity"
-            ></activity>
+        <activity android:name=".activity.PointsActivity" />
+        <activity android:name=".activity.ReportActivity"></activity>
     </application>
 
 </manifest>

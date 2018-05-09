@@ -3,21 +3,31 @@ package cn.xcom.banjing.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.IInterface;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.INotificationSideChannel;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -25,6 +35,7 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.example.mylibrary.RecordAudioView.QRecordAudioView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jcodecraeer.xrecyclerview.ProgressStyle;
@@ -37,20 +48,27 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.IllegalFormatFlagsException;
 import java.util.List;
 
+import bolts.CancellationTokenSource;
 import cn.xcom.banjing.HelperApplication;
 import cn.xcom.banjing.R;
 import cn.xcom.banjing.activity.BindAccountAuthorizedActivity;
 import cn.xcom.banjing.activity.ReleaseConvenienceActivity;
+import cn.xcom.banjing.adapter.CityAdapter;
 import cn.xcom.banjing.adapter.ConvenienceAdapter;
+import cn.xcom.banjing.bean.AdSetting;
 import cn.xcom.banjing.bean.Convenience;
 import cn.xcom.banjing.bean.SkillTagInfo;
 import cn.xcom.banjing.bean.UserInfo;
+import cn.xcom.banjing.bean.locationBase;
 import cn.xcom.banjing.constant.HelperConstant;
 import cn.xcom.banjing.constant.NetConstant;
 import cn.xcom.banjing.net.HelperAsyncHttpClient;
+import cn.xcom.banjing.net.OkHttpUtils;
 import cn.xcom.banjing.record.AudioPlayer;
 import cn.xcom.banjing.utils.CommonAdapter;
 import cn.xcom.banjing.utils.LogUtils;
@@ -63,21 +81,25 @@ import cn.xcom.banjing.utils.StringPostRequest;
 import cn.xcom.banjing.utils.ToastUtil;
 import cn.xcom.banjing.utils.ViewHolder;
 import cz.msebera.android.httpclient.Header;
+import okhttp3.Call;
+import okhttp3.Callback;
 
 /**
  * Created by mac on 2017/8/26.
  */
 
 public class AdFragment extends Fragment implements View.OnClickListener {
-
-    //    private RelativeLayout back;
-    private RelativeLayout cnnvenience_release, rl_money, rl_type, rl_publishtime;
+    private static final String TAG = "AdFragment";
+    private RelativeLayout cnnvenience_release, rl_money, rl_type, rl_publishtime,rl_location,rl_share;
     private TextView tvType, tvMoney,tv_Publishtime;
+    private KProgressHUD kud;
     private List<Convenience> addlist;
     private ConvenienceAdapter convenienceAdapter;
     private XRecyclerView xRecyclerView;
     private KProgressHUD hud;
     private Context mContext;
+    private List<locationBase> locationBaseList = new ArrayList<>();
+    private TextView mSelectText;
 
     String msgCount;
     UserInfo user;
@@ -86,10 +108,15 @@ public class AdFragment extends Fragment implements View.OnClickListener {
     LocationClient mLocClient;
     private boolean isFirstIn = true;
     public BDLocationListener myListener = new MyLocationListener();
-    private String district;
-    public static String type;
-    public static String moneyType ="";
-    public static String onlineType ="";
+    public static String type;//技能
+    public static String moneyType ="0";//金钱排序
+    public static String onlineType ="0";//时间排序
+    public static String shareCount = "0";//分享排序
+    public static String provenience = "";//省份
+    public static String city = "";//市
+    public static String district = "";//区
+    public static boolean isRefresh = true;
+    public static String orderby = "";
 
 
     @Nullable
@@ -149,10 +176,20 @@ public class AdFragment extends Fragment implements View.OnClickListener {
         user.readData(mContext);
         addlist = SingleConvenience.get().getAddlist();
         addlist.clear();
+        mSelectText = (TextView) getView().findViewById(R.id.ad_type_select);
+        mSelectText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopupMenu();
+            }
+        });
         cnnvenience_release = (RelativeLayout) getView().findViewById(R.id.cnnvenience_release);
+        rl_share = (RelativeLayout) getView().findViewById(R.id.rl_share_count);
+        rl_share.setOnClickListener(this);
         rl_money = (RelativeLayout) getView().findViewById(R.id.rl_money);
         rl_money.setOnClickListener(this);
-
+        rl_location = (RelativeLayout) getView().findViewById(R.id.rl_location);
+        rl_location.setOnClickListener(this);
         rl_publishtime = (RelativeLayout)getView().findViewById(R.id.rl_publishtime);
         rl_publishtime.setOnClickListener(this);
         rl_type = (RelativeLayout) getView().findViewById(R.id.rl_type);
@@ -170,12 +207,22 @@ public class AdFragment extends Fragment implements View.OnClickListener {
         xRecyclerView.setLoadingListener(new XRecyclerView.LoadingListener() {
             @Override
             public void onRefresh() {
-                getNewDatas(HelperApplication.getInstance().mDistrict, keyWord);
+                //getNewDatas(HelperApplication.getInstance().mDistrict, keyWord);
+                // TODO: 2018/4/19  刷新
+                //getDatas("0","0","0","0","0");
+                isRefresh = true;
+                Log.d(TAG, "onRefresh: ");
+                getDatas();
             }
 
             @Override
             public void onLoadMore() {
-                getMoreDatas(HelperApplication.getInstance().mDistrict, keyWord);
+                //getMoreDatas(HelperApplication.getInstance().mDistrict, keyWord);
+                //getDatas("1","0","0","0","0");
+                //todo 加载更多
+                Log.d(TAG, "onLoadMore: ");
+                isRefresh = false;
+                getDatas();
             }
         });
         convenienceAdapter = new ConvenienceAdapter(addlist, mContext,0);
@@ -189,11 +236,17 @@ public class AdFragment extends Fragment implements View.OnClickListener {
             Log.e("zcq", "getmap1");
             if (location != null) {
                 district = location.getDistrict();
+                provenience = location.getProvince();
+                city = location.getCity();
+                //district = location.getDistrict();
                 mLocClient.stop();
                 if (isFirstIn) {
                     Log.e("zcq", "getmap2");
                     isFirstIn = false;
-                    getNewDatas(district, "");
+                    //getNewDatas(district, "");
+                   /* getDatas("0","0","0","0","0");*/
+                   //todo 第一次刷新，第一次加载；
+                    getDatas();
                 }
             }
         }
@@ -230,9 +283,9 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                 } else {
                     goAuthorized();
                 }*/
-                if (!"".equals(HelperApplication.getInstance().mDistrict) &&
-                        PermissionUtil.gPSIsOPen(mContext)) {
-                    goPublish();
+                if (!"".equals(HelperApplication.getInstance().mDistrict) && PermissionUtil.gPSIsOPen(mContext)) {
+                    getPacketSetting();
+
                 } else {
                     ToastUtil.showShort(mContext, "请开启定位");
                 }
@@ -245,6 +298,12 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.rl_publishtime:
                 showPopupWindowTime();
+                break;
+            case R.id.rl_location:
+                showLocationPopupWindow();
+                break;
+            case R.id.rl_share_count:
+                showPopupWindowShare();
                 break;
 
         }
@@ -301,7 +360,9 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                     tvType.setText(skillTagInfos.get(position).getSkill_name());
                                      type = skillTagInfos.get(position).getSkill_id();
-                                     getSkillDatas();
+                                     //todo 技能加载
+                                    isRefresh = true;
+                                    getDatas();
                                     popupWindow.dismiss();
                                 }
                             });
@@ -332,7 +393,7 @@ public class AdFragment extends Fragment implements View.OnClickListener {
         });
     }
     /**
-     * 是否在线弹出框
+     * 更多排序
      */
     private void showPopupWindowTime() {
         //自定义布局
@@ -350,22 +411,57 @@ public class AdFragment extends Fragment implements View.OnClickListener {
 //        popupWindow.showAtLocation(rl_money, Gravity.TOP,100,100);
         final TextView tv1 = (TextView) layout.findViewById(R.id.tv1);
         final TextView tv2 = (TextView) layout.findViewById(R.id.tv2);
-        tv1.setText("由近到远");
-        tv2.setText("由远到近");
+        final TextView tv3 = (TextView) layout.findViewById(R.id.tv3);
+        final TextView tv4 = (TextView) layout.findViewById(R.id.tv4);
+        final TextView tv5 = (TextView) layout.findViewById(R.id.tv5);
         tv1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv_Publishtime.setText(tv1.getText());
-                onlineType = "0";
+                isRefresh = true;
+                tv_Publishtime.setText("智能排序");
+                orderby="";
                 getDatas();
+                // TODO: 2018/4/19
                 popupWindow.dismiss();
             }
         });
         tv2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tv_Publishtime.setText(tv2.getText());
-                onlineType = "1";
+                isRefresh = true;
+                tv_Publishtime.setText("时间最近");
+                orderby = "10";
+                getDatas();
+                // TODO: 2018/4/19
+                popupWindow.dismiss();
+            }
+        });
+        tv3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRefresh = true;
+                tv_Publishtime.setText("赏金最高");
+                orderby = "20";
+                getDatas();
+                popupWindow.dismiss();
+            }
+        });
+        tv4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRefresh = true;
+                tv_Publishtime.setText("分享最多");
+                orderby = "30";
+                getDatas();
+                popupWindow.dismiss();
+            }
+        });
+        tv5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRefresh = true;
+                tv_Publishtime.setText("剩余赏金最多");
+                orderby = "40";
                 getDatas();
                 popupWindow.dismiss();
             }
@@ -383,8 +479,63 @@ public class AdFragment extends Fragment implements View.OnClickListener {
             }
         });
     }
+
     /**
-     * 是否在线弹出框
+     * 分享数量由大到小，由小到大；
+     */
+    private void showPopupWindowShare() {
+        //自定义布局
+        View layout = LayoutInflater.from(mContext).inflate(R.layout.select_time_mode, null);
+        //初始化popwindow
+        final PopupWindow popupWindow = new PopupWindow(layout, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setBackgroundDrawable(new BitmapDrawable());
+        //设置弹出位置
+        int[] location = new int[2];
+        rl_money.getLocationOnScreen(location);
+        int screenWidth = ScreenUtils.getScreenWidth(mContext);
+        popupWindow.showAsDropDown(rl_publishtime);
+//        popupWindow.showAtLocation(rl_money, Gravity.TOP,100,100);
+        final TextView tv1 = (TextView) layout.findViewById(R.id.tv1);
+        final TextView tv2 = (TextView) layout.findViewById(R.id.tv2);
+        tv1.setText("由少到多");
+        tv2.setText("由多到少");
+        tv1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareCount = "0";
+                getDatas();
+                // TODO: 2018/4/19
+                popupWindow.dismiss();
+            }
+        });
+        tv2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareCount = "1";
+                getDatas();
+                // TODO: 2018/4/19
+                popupWindow.dismiss();
+            }
+        });
+        // 设置背景颜色变暗
+        final WindowManager.LayoutParams lp = getActivity().getWindow().getAttributes();
+        lp.alpha = 0.7f;
+        getActivity().getWindow().setAttributes(lp);
+        //监听popwindow消失事件，取消遮盖层
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                lp.alpha = 1.0f;
+                getActivity().getWindow().setAttributes(lp);
+            }
+        });
+    }
+
+
+    /**
+     * 赏金高低
      */
     private void showPopupWindow2() {
         //自定义布局
@@ -410,6 +561,7 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                 tvMoney.setText(tv1.getText());
                 moneyType = "0";
                 getDatas();
+                // TODO: 2018/4/19 赏金排序
                 popupWindow.dismiss();
             }
         });
@@ -419,6 +571,7 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                 tvMoney.setText(tv2.getText());
                 moneyType = "1";
                 getDatas();
+                // TODO: 2018/4/19 赏金排序
                 popupWindow.dismiss();
             }
         });
@@ -435,9 +588,115 @@ public class AdFragment extends Fragment implements View.OnClickListener {
             }
         });
     }
+    /**
+     * 地区选择PopupWindow
+     */
+    private void showLocationPopupWindow() {
+        //自定义布局
+        final View layout = LayoutInflater.from(mContext).inflate(R.layout.location_select, null);
+        //初始化popwindow
+        final PopupWindow popupWindow = new PopupWindow(layout, LinearLayout.LayoutParams.MATCH_PARENT, 660);
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setBackgroundDrawable(new BitmapDrawable());
+        //设置弹出位置
+        final int[] location = new int[2];
+        rl_money.getLocationOnScreen(location);
+        int screenWidth = ScreenUtils.getScreenWidth(mContext);
+        popupWindow.showAsDropDown(rl_location);
+//        popupWindow.showAtLocation(rl_money, Gravity.TOP,100,100);
+        StringPostRequest request = new StringPostRequest(NetConstant.LOCATION, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                if (hud != null) {
+                    hud.dismiss();
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    String status = jsonObject.getString("status");
+                    if (status.equals("success")) {
+                        String data = jsonObject.getString("data");
+                        List<locationBase> locationBases = new Gson().fromJson(data,new TypeToken<List<locationBase>>(){}.getType());
 
-    private void goPublish() {
-        startActivity(new Intent(mContext, ReleaseConvenienceActivity.class));
+                        locationBase base = new locationBase();
+                        final List<locationBase.ChildlistBean> childlistBeans = new ArrayList<>();
+                        locationBase.ChildlistBean bean = new locationBase.ChildlistBean();
+                        bean.setName("全国各地");
+                        childlistBeans.add(bean);
+                        base.setName("全国");
+                        base.setChildlist(childlistBeans);
+                        locationBaseList.clear();
+                        locationBaseList.add(base);
+                        locationBaseList.addAll(locationBases);
+                        ListView lvLocation = (ListView) layout.findViewById(R.id.lv_location);
+                        final RecyclerView rvlocation = (RecyclerView) layout.findViewById(R.id.rv_location);
+                        final List<String> proveniences = new ArrayList<>();
+                        for (int i = 0; i <locationBaseList.size(); i++) {
+                            proveniences.add(locationBaseList.get(i).getName());
+                        }
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,android.R.layout.simple_list_item_1,proveniences);
+                        lvLocation.setAdapter(adapter);
+                        lvLocation.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                provenience = proveniences.get(position);
+                                GridLayoutManager manager = new GridLayoutManager(mContext,3);
+                                rvlocation.setLayoutManager(manager);
+                                final List<locationBase.ChildlistBean> childlistBeans = (List<locationBase.ChildlistBean>) locationBaseList.get(position).getChildlist();
+                                final CityAdapter cityAdapter = new CityAdapter(locationBaseList.get(position).getChildlist(), new CityAdapter.ItemCliclk() {
+                                    @Override
+                                    public void onClick(int position) {
+                                        popupWindow.dismiss();
+                                        //todo 地区选择
+                                        city = childlistBeans.get(position).getName();
+                                        isRefresh = true;
+                                        getDatas();
+                                    }
+                                });
+                                rvlocation.setAdapter(cityAdapter);
+                            }
+                        });
+
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                xRecyclerView.refreshComplete();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                if (hud != null) {
+                    hud.dismiss();
+                }
+                ToastUtil.Toast(mContext, "网络错误，请检查");
+
+
+            }
+        });
+
+        SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
+        // 设置背景颜色变暗
+        final WindowManager.LayoutParams lp = getActivity().getWindow().getAttributes();
+        lp.alpha = 0.7f;
+        getActivity().getWindow().setAttributes(lp);
+        //监听popwindow消失事件，取消遮盖层
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                lp.alpha = 1.0f;
+                getActivity().getWindow().setAttributes(lp);
+            }
+        });
+    }
+
+    private void goPublish(int money,int count) {
+        Intent intent = new Intent(mContext, ReleaseConvenienceActivity.class);
+        intent.putExtra("min_packet_money",money);
+        intent.putExtra("min_packet_count",count);
+        startActivity(intent);
 
 
     }
@@ -447,59 +706,14 @@ public class AdFragment extends Fragment implements View.OnClickListener {
         startActivity(intent);
     }
 
-    private void getNewDatas(String district, String keyWord) {
-        String url = NetConstant.CONVENIENCE;
-        LogUtils.d("---url", url);
-        StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                if (hud != null) {
-                    hud.dismiss();
-                }
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
-                    String status = jsonObject.getString("status");
-                    if (status.equals("success")) {
-                        String data = jsonObject.getString("data");
-                        LogUtils.d("---data", data);
-                        Gson gson = new Gson();
-                        List<Convenience> lists = gson.fromJson(data, new TypeToken<ArrayList<Convenience>>() {
-                        }.getType());
-                        addlist.clear();
-                        addlist.addAll(lists);
-                        LogUtils.d("---addlist", addlist.toString());
-                        convenienceAdapter.notifyDataSetChanged();
-
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                xRecyclerView.refreshComplete();
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                if (hud != null) {
-                    hud.dismiss();
-                }
-                ToastUtil.Toast(mContext, "网络错误，请检查");
-                xRecyclerView.refreshComplete();
-
-            }
-        });
-        request.putValue("beginid", "0");
-        request.putValue("type", type);
-        request.putValue("keyword", keyWord);
-        request.putValue("city", HelperApplication.getInstance().mDistrict);
-        request.putValue("onlineType",onlineType);
-        request.putValue("moneyType",moneyType);
-        Log.e("获取广告", HelperApplication.getInstance().mDistrict);
-        SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
-    }
-
     private void getDatas() {
-        String url = NetConstant.CONVENIENCE;
+        hud = KProgressHUD.create(mContext)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setDetailsLabel("正在加载...")
+                .setCancellable(true);
+        hud.show();
+        String size = "0";
+        String url = NetConstant.GET_AD_LIST;
         Log.d("---url", url);
         StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
             @Override
@@ -515,16 +729,25 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                         Gson gson = new Gson();
                         List<Convenience> lists = gson.fromJson(data, new TypeToken<ArrayList<Convenience>>() {
                         }.getType());
-                        addlist.clear();
-                        addlist.addAll(lists);
+                        if (isRefresh){
+                            addlist.clear();
+                            isRefresh = false;
+                        }
+                        if (null!=lists&&lists.size()>0) {
+                            addlist.addAll(lists);
+                        }
                         convenienceAdapter.notifyDataSetChanged();
-                       // xRecyclerView.scrollToPosition(0);
 
+                    }
+                    else {
+                        String data = jsonObject.getString("data");
+                        Toast.makeText(mContext,data,Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 xRecyclerView.refreshComplete();
+                xRecyclerView.loadMoreComplete();
 
             }
         }, new Response.ErrorListener() {
@@ -535,22 +758,35 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                 }
                 ToastUtil.Toast(mContext, "网络错误，请检查");
                 xRecyclerView.refreshComplete();
+                xRecyclerView.loadMoreComplete();
 
             }
         });
-        request.putValue("beginid", "0");
+        request.putValue("userid",user.getUserId());
         request.putValue("type", type);
-        request.putValue("keyword", keyWord);
-        request.putValue("city", HelperApplication.getInstance().mDistrict);
-        request.putValue("onlineType",onlineType);
-        request.putValue("moneyType",moneyType);
-        Log.e("获取广告", HelperApplication.getInstance().mDistrict);
+        if (isRefresh){
+            size = "0";
+        }else {
+            size = addlist.size()+"";
+        }
+        request.putValue("original_array_count",size);
+        request.putValue("province",provenience);
+        request.putValue("city",city);
+        request.putValue("address",district);
+        request.putValue("orderby",orderby);
+        /*request.putValue("sort_by_create_time",onlineType);
+        request.putValue("sort_by_bounty",moneyType);
+        request.putValue("sort_by_share_count",shareCount);*/
+        Log.d(TAG, "getDatas: type"+type +"/original_array_count :"+size+"sort_by_create_time :"+onlineType
+        +"sort_by_bounty :"+moneyType+"sort_by_share_count :"+shareCount);
         SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
     }
-    private void getSkillDatas() {
-        String url = NetConstant.CONVENIENCE;
-        Log.d("---url", url);
-        StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
+
+    /**
+     * 获取红包设置
+     */
+    public void getPacketSetting(){
+        StringPostRequest request = new StringPostRequest(NetConstant.GET_PUBLISH_AD_SETTING, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 if (hud != null) {
@@ -561,13 +797,18 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                     String status = jsonObject.getString("status");
                     if (status.equals("success")) {
                         String data = jsonObject.getString("data");
-                        Gson gson = new Gson();
-                        List<Convenience> lists = gson.fromJson(data, new TypeToken<ArrayList<Convenience>>() {
-                        }.getType());
-                        addlist.clear();
-                        addlist.addAll(lists);
-                        convenienceAdapter.notifyDataSetChanged();
-                        xRecyclerView.scrollToPosition(0);
+                        AdSetting adSetting = new Gson().fromJson(data,AdSetting.class);
+                        if (adSetting.getCan_publish().isStatus()){
+                            // TODO: 2018/4/19
+
+                            goPublish(adSetting.getPacket_setting().getMoney(),adSetting.getPacket_setting().getCount());
+                        }else {
+                            Toast.makeText(mContext,adSetting.getCan_publish().getReason(),Toast.LENGTH_SHORT).show();
+                        }
+
+
+
+                    }else {
 
                     }
                 } catch (JSONException e) {
@@ -583,89 +824,16 @@ public class AdFragment extends Fragment implements View.OnClickListener {
                     hud.dismiss();
                 }
                 ToastUtil.Toast(mContext, "网络错误，请检查");
-                xRecyclerView.refreshComplete();
+
 
             }
         });
-        request.putValue("beginid", "0");
-        request.putValue("type", type);
-        request.putValue("keyword", keyWord);
-        request.putValue("city", HelperApplication.getInstance().mDistrict);
-        request.putValue("onlineType",onlineType);
-        request.putValue("moneyType",moneyType);
-        Log.e("获取广告", HelperApplication.getInstance().mDistrict);
+        request.putValue("userid",user.getUserId());
         SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
     }
-    private void getMoreDatas(String district, String keyWord) {
-        Log.e("zcq", "getmore");
-        String url = NetConstant.CONVENIENCE;
-        StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
-                    String status = jsonObject.getString("status");
-                    if (status.equals("success")) {
 
-                        String data = jsonObject.getString("data");
-                        Log.e("获取广告", data);
-                        Gson gson = new Gson();
-                        List<Convenience> lists = gson.fromJson(data, new TypeToken<ArrayList<Convenience>>() {
-                        }.getType());
-                        addlist.addAll(lists);
-                        convenienceAdapter.notifyDataSetChanged();
 
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                xRecyclerView.loadMoreComplete();
 
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                ToastUtil.Toast(mContext, "网络错误，请检查");
-                xRecyclerView.loadMoreComplete();
-            }
-
-        });
-        Convenience lastConV = addlist.get(addlist.size() - 1);
-        request.putValue("beginid", lastConV.getMid());
-        request.putValue("type", type);
-        request.putValue("onlineType",onlineType);
-        request.putValue("moneyType",moneyType);
-        request.putValue("city", HelperApplication.getInstance().mDistrict);
-        request.putValue("keyword", keyWord);
-        Log.e("获取广告", HelperApplication.getInstance().mDistrict);
-        Log.e("city", HelperApplication.getInstance().mDistrict);//HelperApplication.getInstance().mDistrict
-        Log.e("beginid", lastConV.getMid());
-        SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
-
-    }
-
-//    /*
-//    * 点击屏幕外隐藏键盘
-//    * */
-//    @Override
-//    public boolean dispatchTouchEvent(MotionEvent ev) {
-//        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-//            View v = getCurrentFocus();
-//            if (DateUtil.isShouldHideInput(v, ev)) {
-//
-//                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//                if (imm != null) {
-//                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-//                }
-//            }
-//            return super.dispatchTouchEvent(ev);
-//        }
-//        // 必不可少，否则所有的组件都不会有TouchEvent了
-//        if (getWindow().superDispatchTouchEvent(ev)) {
-//            return true;
-//        }
-//        return onTouchEvent(ev);
-//    }
 
 }
 

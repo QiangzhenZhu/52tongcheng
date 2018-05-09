@@ -123,9 +123,10 @@ public class BuyActivity extends BaseActivity implements View.OnClickListener {
                 }
                 break;
             case R.id.btnIncrease:
-                amount= Integer.parseInt(String.valueOf(etAmount.getText()));
+                // TODO: 2018/4/27  
+                /*amount= Integer.parseInt(String.valueOf(etAmount.getText()));
                 amount++;
-                etAmount.setText(amount+"");
+                etAmount.setText(amount+"");*/
                 break;
             case R.id.buy_commit:
                 submit();

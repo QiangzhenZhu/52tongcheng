@@ -684,7 +684,7 @@ public class TosGallery extends TosAbsSpinner implements GestureDetector.OnGestu
     }
 
     /**
-     * Offset the horizontal location of all children of this view by the specified number of
+     * Offset the horizontal locationBase of all children of this view by the specified number of
      * pixels.
      * 
      * @param offset the number of pixels to offset

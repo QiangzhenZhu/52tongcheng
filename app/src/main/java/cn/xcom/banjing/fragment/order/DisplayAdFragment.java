@@ -1,8 +1,10 @@
 package cn.xcom.banjing.fragment.order;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -33,10 +35,12 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,9 +59,11 @@ import com.alipay.share.sdk.openapi.IAPApi;
 import com.alipay.share.sdk.openapi.SendMessageToZFB;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.baidu.mapapi.map.Text;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kaopiz.kprogresshud.KProgressHUD;
+import com.nostra13.universalimageloader.core.assist.deque.LIFOLinkedBlockingDeque;
 import com.pili.pldroid.player.AVOptions;
 import com.pili.pldroid.player.IMediaController;
 import com.pili.pldroid.player.PLMediaPlayer;
@@ -78,15 +84,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import bolts.CancellationTokenSource;
+import cn.xcom.banjing.HelperApplication;
 import cn.xcom.banjing.R;
 import cn.xcom.banjing.WXpay.Constants;
 import cn.xcom.banjing.activity.DisplayAdViewPagerActivivty;
 import cn.xcom.banjing.activity.DisplayAdvertisingActivity;
 import cn.xcom.banjing.activity.DisplayVideoAdvertisingActivity;
+import cn.xcom.banjing.activity.LoginActivity;
+import cn.xcom.banjing.activity.ReportActivity;
 import cn.xcom.banjing.adapter.AdCommentListAdapter;
 import cn.xcom.banjing.adapter.ViewPageAdapter;
 import cn.xcom.banjing.bean.ADInfo;
@@ -95,6 +107,7 @@ import cn.xcom.banjing.bean.CommentInfo;
 import cn.xcom.banjing.bean.Convenience;
 import cn.xcom.banjing.bean.UserInfo;
 import cn.xcom.banjing.constant.NetConstant;
+import cn.xcom.banjing.net.OkHttpUtils;
 import cn.xcom.banjing.share.ShareHelper;
 import cn.xcom.banjing.temp.MediaplayerController;
 import cn.xcom.banjing.utils.Config;
@@ -108,7 +121,11 @@ import cn.xcom.banjing.utils.ToastUtil;
 import cn.xcom.banjing.utils.ToastUtils;
 import cn.xcom.banjing.view.CommentPopupWindow;
 import cn.xcom.banjing.view.SharePopupWindow;
+import okhttp3.Call;
+import okhttp3.Callback;
 
+import static cn.xcom.banjing.R.id.time;
+import static cn.xcom.banjing.R.id.tv_avaliable_scores;
 import static cn.xcom.banjing.utils.ToastUtils.mToast;
 import static com.tencent.connect.share.QzoneShare.SHARE_TO_QZONE_TYPE_IMAGE_TEXT;
 
@@ -147,7 +164,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     Resources res;
     Bitmap bitmap;
     String thumbPath;
-    private Tencent mTencent;
+    public static Tencent mTencent;
     private BaseUiListener listener;
     private Collection collection;
     private List<Collection> addList;
@@ -163,13 +180,6 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     private String veidoUrl;
     //private MediaplayerController mController;
     private int type;
-    //private RelativeLayout layout_video_play;
-    //private SurfaceView surfaceview_video;
-    //private ImageView img_video_error;
-    //private MediaPlayer mPlayer;
-    //private SurfaceHolder.Callback mCallback;
-    //private MediaPlayer.OnPreparedListener mPreparedListener;
-    //private MediaplayerController.ControlOper mPlayerControl;
     private View mView;
     private int position;
     private final static String CURPOSITION = "curPosition";
@@ -189,6 +199,13 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     private LinearLayout ll_convenience_collection;
     private ImageView convenience_collection;
     private TextView trend_item_tv_collection;
+    private TextView btn_report;
+    private Button btnReward;
+    private View.OnClickListener onListner;
+    private int rewardPoints = 0;
+    private String mid;
+    private CountDownTimer timer ;
+    private boolean isFirstIn = false;
 
 
     public static DisplayAdFragment newInstance(Convenience adInfo,int type) {
@@ -226,14 +243,32 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         mVedioView = (PLVideoTextureView) view.findViewById(R.id.PLVideoTextureView);
         userInfo = new UserInfo();
         userInfo.readData(mContext);
-        View mLoadingView = view.findViewById(R.id.LoadingView);
+
+        final View mLoadingView = view.findViewById(R.id.LoadingView);
         mLoadingView.setVisibility(View.VISIBLE);
         mVedioView.setBufferingIndicator(mLoadingView);
         mVedioView.setDisplayAspectRatio(PLVideoView.ASPECT_RATIO_FIT_PARENT);
         mVedioFrameLayout = (FrameLayout) view.findViewById(R.id.vedio_FrameLayout);
+        btnReward = (Button) view.findViewById(R.id.btn_reward);
+        //打赏按钮
+        btnReward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            getAvaliableReward();
 
+            }
+        });
         AdInfo= (Convenience) getArguments().getSerializable("adinfo");
-        String mid = getArguments().getString("Mid");
+        mid = getArguments().getString("Mid");
+        btn_report = (TextView) view.findViewById(R.id.bt_report);
+        btn_report.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, ReportActivity.class);
+                intent.putExtra("refid",AdInfo.getMid());
+                startActivity(intent);
+            }
+        });
         viewPager= (ViewPager) view.findViewById(R.id.view_pager);
         //layout_view_play= (LinearLayout) view.findViewById(R.id.layout_view_play);
         //layout_video_play= (RelativeLayout) view.findViewById(R.id.layout_video_play);
@@ -330,8 +365,8 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         linearLayoutManager.setReverseLayout(true);
         linearLayoutManager.setStackFromEnd(true);
         chatAdRecycleView.setLayoutManager(linearLayoutManager);
-        if(AdInfo!=null){
-            if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
+        if(AdInfo!=null) {
+            /*if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
 
                 commentInfos=  AdInfo.getComment();
                 adapter=new AdCommentListAdapter(commentInfos);
@@ -369,6 +404,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         }else{
 
             ((Activity)mContext).finish();
+        }*/
         }
         //解决未知布局嵌套的原因致使 ScrollView 滑到中部，现在滑动会顶部
         tv_username.setFocusable(true);
@@ -388,7 +424,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
 
     private void lazyLoad() {
         if (isViewCreated&&isUiVisible){
-            mVedioView.start();
+            getAdByMid(mid);
         }
     }
 
@@ -521,210 +557,19 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser){
-            timer.start();
             isUiVisible = true;
             lazyLoad();
 
 
-        }else {
-            if (mVedioView != null){
+        } else {
+            if (mVedioView != null) {
                 mVedioView.pause();
             }
-            timer.cancel();
-        }
-        /*if (isVisibleToUser&&getUserVisibleHint()) {
-           timer.start();
-          /* if (type == 1) {
-                   viewPager.setVisibility(View.GONE);
-                   layout_view_play.setVisibility(View.VISIBLE);
-                   veidoUrl = NetConstant.NET_DISPLAY_IMG + AdInfo.getVideo();
-                   getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                   initListeners();
-                   getLayoutVideoPlay(mView);
-                   hasPlayed = false;
-
-           }
-        }
-        if (!isVisibleToUser){
-            timer.cancel();
-            if (type ==1){
-                //mPlayer.stop();
+            if (timer!=null) {
+                timer.cancel();
             }
-        }*/
-
-    }
-
-    /**
-     * 视频播放部分
-     */
-   /* private void getLayoutVideoPlay(View view) {
-        layout_video_play = (RelativeLayout)view. findViewById(R.id.layout_video_play);
-        layout_view_play = (LinearLayout) view.findViewById(R.id.layout_view_play);
-        surfaceview_video = (SurfaceView) view.findViewById(R.id.surfaceview_video);
-        img_video_error = (ImageView) view.findViewById(R.id.img_video_error);
-        img_video_error.setOnClickListener(this);
-        SurfaceHolder surfaceHolder = surfaceview_video.getHolder();
-        surfaceHolder.addCallback(mCallback);
-        mPlayer = new MediaPlayer();
-        mController = new MediaplayerController(mContext);
-        netTypeVideoPlayer();
-        Configuration configuration=new Configuration();
-        onConfigurationChanged(configuration);
-    }*/
-
-    /**
-     * 判断网络是移动网络还是 WIFI 还是 没网操作
-     */
-   /* private void netTypeVideoPlayer() {
-        try {
-            img_video_error.setVisibility(View.GONE);
-            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mPlayer.setDataSource(veidoUrl);
-            mPlayer.setOnPreparedListener(mPreparedListener);
-            mPlayer.prepareAsync();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
-    private void initListeners() {
-        mCallback = new SurfaceHolder.Callback() {
-            public void surfaceCreated(SurfaceHolder holder) {
-                mPlayer.setDisplay(holder);
-            }
-
-            public void surfaceChanged(SurfaceHolder holder, int format,
-                                       int width, int height) {
-            }
-
-            public void surfaceDestroyed(SurfaceHolder holder) {
-            }
-        };
-        mPreparedListener = new MediaPlayer.OnPreparedListener() {
-            public void onPrepared(MediaPlayer mp) {
-
-                mController.setMediaPlayer(mPlayerControl);
-                mController
-                        .setAnchorView((FrameLayout)mView.findViewById(R.id.video_surfacecontainer));
-                //mPlayer.start();
-                if (position > 0) {
-                    mPlayer.seekTo(position);
-                }
-            }
-        };
-        mPlayerControl = new MediaplayerController.ControlOper() {
-            public void start() {
-                mPlayer.start();
-            }
-
-            public void pause() {
-                mPlayer.pause();
-            }
-
-            public int getDuration() {
-                return mPlayer.getDuration();
-            }
-
-            public int getCurPosition() {
-                return mPlayer.getCurrentPosition();
-            }
-
-            public void seekTo(int pos) {
-                mPlayer.seekTo(pos);
-            }
-
-            public boolean isPlaying() {
-                return mPlayer.isPlaying();
-            }
-
-            public int getBufPercent() {
-                return 0;
-            }
-
-            public boolean canPause() {
-                return true;
-            }
-
-            public boolean canSeekBackward() {
-                return true;
-            }
-
-            public boolean canSeekForward() {
-                return true;
-            }
-
-            public boolean isFullScreen() {
-                if (screenOrient() == 0) {
-                    return true;
-                }
-                return false;
-            }
-
-
-
-            /** 判断横竖屏 @return 1：竖 | 0：横 */
-            @SuppressWarnings("deprecation")
-           /* public int screenOrient() {
-                int orient = getActivity().getRequestedOrientation();
-                if (orient != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                        && orient != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    WindowManager windowManager = getActivity()
-                            .getWindowManager();
-                    Display display = windowManager.getDefaultDisplay();
-                    int screenWidth = display.getWidth();
-                    int screenHeight = display.getHeight();
-                    orient = screenWidth < screenHeight ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                            : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                }
-                return orient;
-            }
-
-            /** 使屏幕处于竖屏 */
-           /* public void verticalScreen() {
-                getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                setPortraitWidthHeight();
-
-            }
-
-            /** 使屏幕处于横屏 */
-            /*public void fullScreen() {
-                getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                setLandscapeWidthHeight();
-
-            }
-        };
-    }
-    /**
-     * 设置竖屏时候播放器的宽高
-     */
-   /* private void setPortraitWidthHeight() {
-        DisplayMetrics dm = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int mSurfaceViewWidth = dm.widthPixels;
-        int mSurfaceViewHeight = dm.heightPixels;
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.width = mSurfaceViewWidth;
-        lp.height = mSurfaceViewHeight * 1 / 3;
-        layout_view_play.setLayoutParams(lp);
-    }
-
-    /**
-     * 设置横屏时候播放器的宽高
-     */
-    /*private void setLandscapeWidthHeight() {
-        DisplayMetrics dm = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int mSurfaceViewWidth = dm.widthPixels;
-        int mSurfaceViewHeight = dm.heightPixels;
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        lp.width = mSurfaceViewWidth;
-        lp.height = mSurfaceViewHeight-50;
-        layout_view_play.setLayoutParams(lp);
-    }*/
-
 
 
 
@@ -738,39 +583,8 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     }
 
 
-    private CountDownTimer timer = new CountDownTimer(9000, 1000) {
-
-        @Override
-        public void onTick(long millisUntilFinished) {
-            down_time.setText(millisUntilFinished/1000+"''");
-        }
-
-        @Override
-        public void onFinish() {
-            timetext.setVisibility(View.GONE);
-            //没有红包则不抢
-            if ("0".equals(AdInfo.getRedpacket())){
-                down_time.setText("");
-            }else {
-                touchPacket();
-            }
 
 
-
-        }
-    };
-
-    /*public View.OnTouchListener clickListener=new View.OnTouchListener() {
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (v.getId() == R.id.layout_video_play) {
-                mController.show();
-            }
-            return false;
-        }
-    
-    };*/
 
     
     @Override
@@ -791,53 +605,6 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
 
         }
     }
-    /*@Override
-   public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // 检测屏幕的方向：纵向或横向
-        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            System.out.println("当前屏幕=》》》》横屏");
-            // 当前为横屏， 在此处添加额外的处理代码
-            setLandscapeWidthHeight();
-            rl_top.setVisibility(View.GONE);
-            scrollView.setVisibility(View.GONE);
-            ll_bottom.setVisibility(View.GONE);
-
-        } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            System.out.println("当前屏幕=》》》》竖屏");
-            // 当前为竖屏， 在此处添加额外的处理代码
-            setPortraitWidthHeight();
-            rl_top.setVisibility(View.VISIBLE);
-            scrollView.setVisibility(View.VISIBLE);
-            ll_bottom.setVisibility(View.VISIBLE);
-        }
-        // 检测实体键盘的状态：推出或者合上
-        if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
-            // 实体键盘处于推出状态，在此处添加额外的处理代码
-        } else if (newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
-            // 实体键盘处于合上状态，在此处添加额外的处理代码
-        }
-    }
-
-
-   /**
-     * 当用户按下返回键的时候判断当前手机状态是横屏还是竖屏
-     */
-
-   /*@Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            if (mPlayerControl.screenOrient() == 0) {
-                mPlayerControl.fullScreen();
-                return false;
-            } else {
-               getActivity().finish();
-                return true;
-            }
-        }
-        return super.onKeyDown(keyCode, event);
-    }*/
-
 
 
 
@@ -860,6 +627,8 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         @Override
         public void onComplete(Object o) {
 //            enableAction(enableActionShareQRCodeActivity.this.action);
+            // TODO: 2018/4/21
+            shareNotify();
         }
     }
     public void showPopComment(){
@@ -1061,9 +830,11 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
      * 微信分享网页
      */
     private void shareWX() {
+        HelperApplication.shareType = 2;
+        HelperApplication.refid = Integer.parseInt(mid);
         //创建一个WXWebPageObject对象，用于封装要发送的Url
         WXWebpageObject webpage = new WXWebpageObject();
-        webpage.webpageUrl = NetConstant.SHARE_SHOP_H5 + userInfo.getUserId();
+        webpage.webpageUrl = NetConstant.SHARE_AD + mid;
         WXMediaMessage msg = new WXMediaMessage(webpage);
         msg.title = ShareHelper.AdShareTitle;
         msg.description = ShareHelper.AdShareContent;
@@ -1074,6 +845,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         req.message = msg;
         req.scene = wxflag == 0 ? SendMessageToWX.Req.WXSceneSession : SendMessageToWX.Req.WXSceneTimeline;
         msgApi.sendReq(req);
+
     }
 
     /**
@@ -1084,6 +856,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         wxflag = 0;
         shareWX();
         takePhotoPopWin.dismiss();
+
 
     }
 
@@ -1265,7 +1038,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         //创建工具对象实例，此处的APPID为上文提到的，申请应用生效后，在应用详情页中可以查到的支付宝应用唯一标识
         IAPApi api = APAPIFactory.createZFBApi(mContext.getApplicationContext(), "2016083001821606", false);
         APWebPageObject webPageObject = new APWebPageObject();
-        webPageObject.webpageUrl = NetConstant.SHARE_SHOP_H5 + userInfo.getUserId();
+        webPageObject.webpageUrl = NetConstant.SHARE_AD + userInfo.getUserId();
 
         //组装分享消息对象
         APMediaMessage mediaMessage = new APMediaMessage();
@@ -1284,6 +1057,10 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
 
 
     private void shareToQQ() {
+        HelperApplication.shareType = 0;
+        HelperApplication.refid = 0;
+        HelperApplication.shareType = 2;
+        HelperApplication.refid = Integer.parseInt(mid);
         Bundle params = new Bundle();
         params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
         params.putString(QQShare.SHARE_TO_QQ_TITLE, ShareHelper.AdShareTitle);
@@ -1295,6 +1072,10 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     }
 
     private void shareToQzone() {
+        HelperApplication.shareType = 0;
+        HelperApplication.refid = 0;
+        HelperApplication.shareType = 2;
+        HelperApplication.refid = Integer.parseInt(mid);
         Bundle params = new Bundle();
         //分享类型
         params.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE, SHARE_TO_QZONE_TYPE_IMAGE_TEXT);
@@ -1393,7 +1174,9 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        timer.cancel();
+        if (timer!=null) {
+            timer.cancel();
+        }
         mVedioView.stopPlayback();
         /*if (type == 1){
             releaseMediaPlayer();
@@ -1412,7 +1195,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onResume() {
         super.onResume();
-        getAdByMid(AdInfo.getMid());
+        getAdByMid(mid);
         judgeIsCollection();
 
     }
@@ -1432,9 +1215,9 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                         if (TextUtils.isEmpty(AdInfo.getBalance())) {
                             tvPriase.setText("0");
                         }else {
-                            tvPriase.setText(AdInfo.getBalance());
+                            tvPriase.setText(AdInfo.getRed_balance()+"");
                         }
-                        tvRedpacket.setText(AdInfo.getRedpacket());
+                        tvRedpacket.setText(AdInfo.getRed_packet()+"");
                         tvLikeText.setText(AdInfo.getLike().size()+"");
                         if (adapter != null){
                             adapter.notifyDataSetChanged();
@@ -1443,10 +1226,83 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                             adapter = new AdCommentListAdapter(commentInfos);
                             chatAdRecycleView.setAdapter(adapter);
                         }
+                        // TODO: 2018/4/18
 
+                        if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
 
+                            commentInfos=  AdInfo.getComment();
+                            adapter=new AdCommentListAdapter(commentInfos);
+                            chatAdRecycleView.setAdapter(adapter);
+                        }
+                        tvContent.setText(AdInfo.getContent());
+                        userphoto=AdInfo.getPhoto();
+                        username=AdInfo.getName();
+                        if (TextUtils.isEmpty(AdInfo.getBalance())) {
+                            tvPriase.setText("0");
+                        }else {
+                            tvPriase.setText(AdInfo.getRed_balance()+"");
+                        }
+                        tv_username.setText(username);
+                        tvRedpacket.setText(AdInfo.getRed_packet()+"");
+                        tvLikeText.setText(AdInfo.getLike().size()+"");
+                        trend_item_tv_collection.setText((Integer.parseInt(AdInfo.getFavorites_count()))+"");
+                        MyImageLoader.display(NetConstant.NET_DISPLAY_IMG + userphoto, user_photo);
+                        imageUrls=new ArrayList<>();
+                        imageViews=new ArrayList<>();
+                        for (int i = 0; i <AdInfo.getPic().size() ; i++) {
+                            String imageUrl=AdInfo.getPic().get(i).getPictureurl();
+                            imageUrls.add(NetConstant.NET_DISPLAY_IMG + imageUrl);
+                            ImageView imageView=new ImageView(mContext);
+                            Bitmap bmap = imageView.getDrawingCache();
+                            imageView.setImageBitmap(bmap);
+                            MyImageLoader.display(NetConstant.NET_DISPLAY_IMG + imageUrl, imageView);
+                            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                            imageViews.add(imageView);
 
+                        };
+
+                        viewPageAdapter=new ViewPageAdapter(imageUrls,imageViews,mContext);
+                        viewPager.setAdapter(viewPageAdapter);
+                        // TODO: 2018/4/19
+                        if (isViewCreated&&isUiVisible){
+                            mVedioView.start();
+                            if (!isFirstIn) {
+                                isFirstIn = true;
+                                int time = 9000;
+                                if (!TextUtils.isEmpty(AdInfo.getPackettime())) {
+                                    time = Integer.parseInt(AdInfo.getPackettime()) * 1000;
+                                } else {
+                                    time = 9000;
+                                }
+                                timer = new CountDownTimer(time, 1000) {
+
+                                    @Override
+                                    public void onTick(long millisUntilFinished) {
+                                        down_time.setText(millisUntilFinished / 1000 + "''");
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+                                        timetext.setVisibility(View.GONE);
+                                        //没有红包则不抢
+                                        if ("0".equals(AdInfo.getRedpacket())) {
+                                            down_time.setText("");
+                                        } else {
+                                            touchPacket();
+                                        }
+                                    }
+                                };
+                                timer.start();
+                            }
+                        }
+                    }else{
+
+                        ((Activity)mContext).finish();
                     }
+
+
+
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -1468,5 +1324,309 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
 
     }
 
+    public void Reward(String score, final AlertDialog dialog){
+        Uri uri = Uri.parse(NetConstant.REWARD).buildUpon()
+                .appendQueryParameter("userid",userInfo.getUserId())
+                .appendQueryParameter("ref_id",AdInfo.getUserid())
+                .appendQueryParameter("score",score)
+                .build();
+        hud = KProgressHUD.create(mContext)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setCancellable(false);
+        hud.show();
+        OkHttpUtils.sendOkHttp(uri.toString(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mContext,"网络加载错误",Toast.LENGTH_SHORT).show();
+                        hud.dismiss();
+                        dialog.dismiss();
 
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                String result = response.body().string();
+                try {
+                    final JSONObject object = new JSONObject(result);
+                    if ("success".equals(object.getString("status"))){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(mContext,"打赏成功",Toast.LENGTH_SHORT).show();
+                                hud.dismiss();
+                                dialog.dismiss();
+                            }
+                        });
+
+                    }else {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    String error = object.getString("data");
+                                    Toast.makeText(mContext,error,Toast.LENGTH_SHORT).show();
+                                    hud.dismiss();
+                                    dialog.dismiss();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void getAvaliableReward(){
+        Uri uri = Uri.parse(NetConstant.INTE_POINTS).buildUpon()
+                .appendQueryParameter("userid",userInfo.getUserId())
+                .build();
+        OkHttpUtils.sendOkHttp(uri.toString(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mContext,"网络加载错误",Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                String result = response.body().string();
+                try {
+                    final JSONObject object = new JSONObject(result);
+                    if ("success".equals(object.getString("status"))){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    String data = object.getString("data");
+                                    initReward(data);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+                    }else {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    String error = object.getString("data");
+                                    Toast.makeText(mContext,error,Toast.LENGTH_SHORT).show();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        });
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    public void initReward(String avaliableScores){
+        final AlertDialog dialog = new AlertDialog.Builder(mContext).create();
+        final View rewardView = LayoutInflater.from(mContext).inflate(R.layout.reward_dialog_view,null);
+        final Button GridButton1 = (Button) rewardView.findViewById(R.id.grid_button_1);
+        final Button GridButton2 = (Button) rewardView.findViewById(R.id.grid_button_2);
+        final Button GridButton3 = (Button) rewardView.findViewById(R.id.grid_button_3);
+        final Button GridButton4 = (Button) rewardView.findViewById(R.id.grid_button_4);
+        final Button GridButton5 = (Button) rewardView.findViewById(R.id.grid_button_5);
+        final EditText GridButton6 = (EditText) rewardView.findViewById(R.id.grid_button_6);
+        TextView textView = (TextView) rewardView.findViewById(R.id.tv_avaliable_scores);
+        textView.setText(getResources().getString(R.string.avaliable_scores,avaliableScores));
+        GridButton1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GridButton1.setSelected(!GridButton1.isSelected());
+                if (!GridButton1.isSelected()) {
+                    rewardPoints = 0;
+
+                }
+                else {
+                    GridButton2.setSelected(!GridButton1.isSelected());
+                    GridButton3.setSelected(!GridButton1.isSelected());
+                    GridButton4.setSelected(!GridButton1.isSelected());
+                    GridButton5.setSelected(!GridButton1.isSelected());
+                    GridButton6.setSelected(!GridButton1.isSelected());
+                    GridButton6.setText("");
+                    rewardPoints = 5;
+                }
+
+            }
+        });
+
+        GridButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GridButton2.setSelected(!GridButton2.isSelected());
+                if (!GridButton2.isSelected()){
+                    rewardPoints = 0;
+                }else {
+                    GridButton1.setSelected(!GridButton2.isSelected());
+                    GridButton3.setSelected(!GridButton2.isSelected());
+                    GridButton4.setSelected(!GridButton2.isSelected());
+                    GridButton5.setSelected(!GridButton2.isSelected());
+                    GridButton6.setSelected(!GridButton2.isSelected());
+                    GridButton6.setText("");
+                    rewardPoints = 10;
+                }
+
+
+            }
+        });
+        GridButton3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GridButton3.setSelected(!GridButton3.isSelected());
+                if (!GridButton3.isSelected()){
+                    rewardPoints = 0;
+                }else {
+                    GridButton1.setSelected(!GridButton3.isSelected());
+                    GridButton2.setSelected(!GridButton3.isSelected());
+                    GridButton4.setSelected(!GridButton3.isSelected());
+                    GridButton5.setSelected(!GridButton3.isSelected());
+                    GridButton6.setSelected(!GridButton3.isSelected());
+                    GridButton6.setText("");
+                    rewardPoints = 20;
+                }
+
+
+
+            }
+        });
+
+        GridButton4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                GridButton4.setSelected(!GridButton4.isSelected());
+                if (!GridButton4.isSelected()){
+                    rewardPoints = 0;
+                }else {
+                    GridButton1.setSelected(!GridButton4.isSelected());
+                    GridButton2.setSelected(!GridButton4.isSelected());
+                    GridButton3.setSelected(!GridButton4.isSelected());
+                    GridButton5.setSelected(!GridButton4.isSelected());
+                    GridButton6.setSelected(!GridButton4.isSelected());
+                    GridButton6.setText("");
+                    rewardPoints = 50;
+                }
+
+            }
+        });
+
+        GridButton5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                GridButton5.setSelected(!GridButton5.isSelected());
+                if (!GridButton5.isSelected()){
+                    rewardPoints = 0;
+                }else {
+                    GridButton6.setSelected(!GridButton5.isSelected());
+                    GridButton1.setSelected(!GridButton5.isSelected());
+                    GridButton2.setSelected(!GridButton5.isSelected());
+                    GridButton3.setSelected(!GridButton5.isSelected());
+                    GridButton4.setSelected(!GridButton5.isSelected());
+                    GridButton6.setText("");
+                    rewardPoints = 100;
+                }
+            }
+        });
+        GridButton6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                GridButton6.setSelected(!GridButton6.isSelected());
+                GridButton1.setSelected(!GridButton6.isSelected());
+                GridButton2.setSelected(!GridButton6.isSelected());
+                GridButton3.setSelected(!GridButton6.isSelected());
+                GridButton4.setSelected(!GridButton6.isSelected());
+                GridButton5.setSelected(!GridButton6.isSelected());
+            }
+        });
+        Button BtnReward = (Button) rewardView.findViewById(R.id.btn_reward_dialog);
+        dialog.setView(rewardView);
+        dialog.show();
+        BtnReward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!TextUtils.isEmpty(GridButton6.getText().toString().trim())){
+                    Reward(GridButton6.getText().toString().trim(),dialog);
+                    return;
+                } else if (rewardPoints!=0){
+                    Reward(String.valueOf(rewardPoints),dialog);
+                    return;
+                }
+
+            }
+        });
+    }
+
+    public void shareNotify(){
+        hud = KProgressHUD.create(mContext)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setDetailsLabel("正在加载...")
+                .setCancellable(true);
+        if(hud!= null) {
+            hud.show();
+        }
+        StringPostRequest request = new StringPostRequest(NetConstant.SHARE_SUCCESS, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                if (hud != null) {
+                    hud.dismiss();
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    String status = jsonObject.getString("status");
+                    if (status.equals("success")) {
+                        String data = jsonObject.getString("data");
+
+                    }
+                    else {
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                if (hud != null) {
+                    hud.dismiss();
+                }
+
+
+            }
+        });
+        request.putValue("userid",userInfo.getUserId());
+        request.putValue("type", String.valueOf(HelperApplication.shareType));
+        request.putValue("ref_id",String.valueOf(HelperApplication.refid));
+        SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

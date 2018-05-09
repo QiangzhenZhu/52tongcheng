@@ -70,6 +70,24 @@ public class TaskInfo implements Serializable{
     private String sound;
     private String soundtime;
     private String ishire;
+    private String distance;
+    private String sdistance;
+
+    public String getDistance() {
+        return distance;
+    }
+
+    public void setDistance(String distance) {
+        this.distance = distance;
+    }
+
+    public String getSdistance() {
+        return sdistance;
+    }
+
+    public void setSdistance(String sdistance) {
+        this.sdistance = sdistance;
+    }
 
     public String getIshire() {
         return ishire;

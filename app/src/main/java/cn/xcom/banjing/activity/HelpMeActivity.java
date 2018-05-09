@@ -116,7 +116,7 @@ public class HelpMeActivity extends BaseActivity implements View.OnClickListener
     private static final int REQUEST_SHOWVOICE = 0;
     private static final int SOUND_CODE = 111;
     private Context mContext;
-    private RelativeLayout rl_back;
+    private RelativeLayout rl_back,rl_my_order;
     private NoScrollGridView gv_skill;
     private KProgressHUD hud, submit_hub;
     private ArrayList<SkillTagInfo> skillTagInfos;
@@ -211,6 +211,13 @@ public class HelpMeActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void initView() {
+        rl_my_order = (RelativeLayout) findViewById(R.id.rl_help_me_order);
+        rl_my_order.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mContext, BillActivity.class));
+            }
+        });
         mediaPlayer = new MediaPlayer();
         addsnPicGrid = (NoScrollGridView) findViewById(R.id.addsn_pic_grid);
         rl_grid_photo = (RelativeLayout) findViewById(R.id.rl_grid_photo);
@@ -465,7 +472,10 @@ public class HelpMeActivity extends BaseActivity implements View.OnClickListener
             case R.id.iv_help_me_validity_period:
                 //showTimePicker();
                 Date date = new Date();
-                String startStr = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date);
+                long nowdate = date.getTime();
+                nowdate = nowdate +86400000;
+                Date date1 = new Date(nowdate);
+                String startStr = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date1);
                 TimeSelector timeSelector = new TimeSelector(this, new TimeSelector.ResultHandler() {
                     @Override
                     public void handle(String time) {

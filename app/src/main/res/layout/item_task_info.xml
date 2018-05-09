@@ -204,7 +204,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:text="距离:"
+            android:text="上门距离:"
             android:textColor="@color/colorTheme"
             android:textSize="15sp" />
 
@@ -218,6 +218,26 @@
             android:text="1254米"
             android:textColor="@color/colorTheme"
             android:textSize="15sp" />
+        <TextView
+            android:id="@+id/tv_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@id/tv_distance"
+            android:text="服务距离:"
+            android:textColor="@color/colorTheme"
+            android:textSize="15sp" />
+        <TextView
+            android:id="@+id/tv_distance1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/tv_right"
+            android:text="1254米"
+            android:textColor="@color/colorTheme"/>
+
 
         <TextView
             android:id="@+id/tv_btn_grab"
@@ -232,5 +252,6 @@
             android:text="抢单"
             android:textColor="@color/colorTheme"
             android:textSize="16sp" />
+
     </RelativeLayout>
 </LinearLayout>

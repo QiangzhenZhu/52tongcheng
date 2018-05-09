@@ -228,6 +228,7 @@ public class ChangeSkillsActivity extends BaseActivity {
                             HelperApplication.getInstance().getTaskTypes().clear();
                             Log.d("发布任务", data);
                             Toast.makeText(getApplication(), "修改成功", Toast.LENGTH_SHORT).show();
+                            finish();
                         }else{
                             HelperApplication.getInstance().getTaskTypes().clear();
                         }

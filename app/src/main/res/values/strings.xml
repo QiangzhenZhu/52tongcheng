@@ -359,4 +359,5 @@
     <string name="balance_payment_weixin">余额支付</string>
     <string name="buffering">正在加载</string>
     <string name="packet_setting"> 红包最小金额为%1$.2f元 ,红包最小个数为%2$d个</string>
+    <string name="avaliable_scores">当前可用积分为：%1$s</string>
 </resources>

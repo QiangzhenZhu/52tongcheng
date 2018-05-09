@@ -171,6 +171,8 @@ public class ReleaseConvenienceActivity extends BaseActivity implements View.OnC
         setContentView(R.layout.activity_release_convenience);
         initView();
         configImageLoader();
+        MIN_PACKET_MONEY = getIntent().getIntExtra("min_packet_money",0);
+        MIN_PACKET_COUNT = getIntent().getIntExtra("min_packet_count",0);
 //        getImg();
     }
     private void initView() {
@@ -240,7 +242,7 @@ public class ReleaseConvenienceActivity extends BaseActivity implements View.OnC
     @Override
     protected void onResume() {
         super.onResume();
-        getPacketSettings();
+        //getPacketSettings();
 
 //        if (!HelperApplication.getInstance().help) {
     /*        selectList = HelperApplication.getInstance().getTaskTypes();
@@ -258,81 +260,6 @@ public class ReleaseConvenienceActivity extends BaseActivity implements View.OnC
 
 
 
-    public void getPacketSettings(){
-        /*RequestParams params = new RequestParams();
-        params.put("userid",userInfo.getUserId());
-        HelperAsyncHttpClient.get(NetConstant.GET_PACKET_SETTINGS, params, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                super.onSuccess(statusCode, headers, response);
-//                LogUtils.e(TAG, "--statusCode->" + statusCode + "==>" + response.toString());
-                if (hud != null) {
-                    hud.dismiss();
-                }
-                if (response != null) {
-                    try {
-                        String state = response.getString("status");
-                        if (state.equals("success")) {
-                            JSONObject data = response.getJSONObject("data");
-                            MIN_PACKET_COUNT = Integer.parseInt(data.getString("count"));
-                            MIN_PACKET_MONEY = Integer.parseInt(data.getString("money"));
-                            Log.d(TAG, "onSuccess: " + MIN_PACKET_MONEY +MIN_PACKET_COUNT);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-//                LogUtils.e(TAG, "--statusCode->" + statusCode + "==>" + responseString);
-                if (hud != null) {
-                    hud.dismiss();
-                }
-                Toast.makeText(ReleaseConvenienceActivity.this,"获取红包设置失败",Toast.LENGTH_SHORT).show();
-            }
-        });*/
-        String url = NetConstant.GET_PACKET_SETTINGS;
-        LogUtils.d("---url", url);
-        StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                if (hud != null) {
-                    hud.dismiss();
-                }
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
-                    String status = jsonObject.getString("status");
-                    if (status.equals("success")) {
-                        JSONObject data = jsonObject.getJSONObject("data");
-                        MIN_PACKET_COUNT = Integer.parseInt(data.getString("count"));
-                        MIN_PACKET_MONEY = Double.parseDouble(data.getString("money"));
-                        Log.d(TAG, "onSuccess: " + MIN_PACKET_MONEY +MIN_PACKET_COUNT);
-
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                if (hud != null) {
-                    hud.dismiss();
-                }
-                ToastUtil.Toast(ReleaseConvenienceActivity.this, "网络错误，请检查");
-
-            }
-        });
-        request.putValue("userid", userInfo.getUserId());
-        Log.e("获取广告", HelperApplication.getInstance().mDistrict);
-        SingleVolleyRequest.getInstance(ReleaseConvenienceActivity.this).addToRequestQueue(request);
-    }
 
     /**
      * 判断大分类是否选中
@@ -538,8 +465,10 @@ public class ReleaseConvenienceActivity extends BaseActivity implements View.OnC
         }
         else if (Double.parseDouble(convenience_money.getText().toString().trim())<MIN_PACKET_MONEY) {
             Toast.makeText(this, format, Toast.LENGTH_SHORT).show();
-        } else if (Integer.parseInt(convenience_count.getText().toString().trim())<MIN_PACKET_COUNT){
+        } else if (Integer.parseInt(convenience_count.getText().toString().trim())<MIN_PACKET_COUNT) {
             Toast.makeText(this, format, Toast.LENGTH_SHORT).show();
+        }else if ((Double.parseDouble(convenience_money.getText().toString())/Double.parseDouble(convenience_count.getText().toString())) < 0.01){
+            Toast.makeText(this, "单个红包最小金额不能小于0.01元", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(descriptionString)) {
             Toast.makeText(this, "描述不能为空", Toast.LENGTH_SHORT).show();
 
@@ -688,7 +617,10 @@ public class ReleaseConvenienceActivity extends BaseActivity implements View.OnC
         }
         request.putValue("latitude", String.valueOf(HelperApplication.getInstance().mLocLat));
         request.putValue("longitude", String.valueOf(HelperApplication.getInstance().mLocLon));
-        request.putValue("address", HelperApplication.getInstance().mDistrict);
+        //request.putValue("address", HelperApplication.getInstance().mDistrict);
+        request.putValue("province",String.valueOf(HelperApplication.getInstance().mProvince));
+        request.putValue("city",String.valueOf(HelperApplication.getInstance().city));
+        request.putValue("address",HelperApplication.getInstance().mArea);
         Log.e("发布广告", String.valueOf(HelperApplication.getInstance().mLocLat) + HelperApplication.getInstance().mLocAddress);
         SingleVolleyRequest.getInstance(ReleaseConvenienceActivity.this).addToRequestQueue(request);
     }

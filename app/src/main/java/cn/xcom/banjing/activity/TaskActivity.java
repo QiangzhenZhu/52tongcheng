@@ -76,7 +76,7 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
     private String TAG = "BuyFragment";
     private Context mContext;
     private Button bt_authorized;
-    private RelativeLayout rl_back;
+    private RelativeLayout rl_back,rl_order;
     private UserInfo userInfo;
     private SwitchButton sb;
     private RelativeLayout ll_task;
@@ -141,6 +141,13 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
 //    }
 
     private void initView() {
+        rl_order = (RelativeLayout) findViewById(R.id.rl_help_me_order);
+        rl_order.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mContext, OrderTakingActivity.class));
+            }
+        });
         userInfo = new UserInfo(mContext);
         rl_back = (RelativeLayout) findViewById(R.id.rl_help_me_back);
         rl_back.setOnClickListener(this);
@@ -615,13 +622,9 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
                         taskInfo.getPhoto(), holder.ivAvatar);
             }
             holder.tvPrice.setText(taskInfo.getPrice());
-
             if (!taskInfo.getLongitude().equals("") && !taskInfo.getLatitude().equals("") && !taskInfo.getSlatitude().equals("") && !taskInfo.getSlongitude().equals("")) {
-                holder.tvDistance.setText((int) DistanceUtil.getDistance(
-                        new LatLng(Double.parseDouble(taskInfo.getLatitude()),
-                                Double.parseDouble(taskInfo.getLongitude())),
-                        new LatLng(Double.parseDouble(taskInfo.getSlatitude()),
-                                Double.parseDouble(taskInfo.getSlongitude()))) + "米");
+                holder.tvDistance.setText(taskInfo.getDistance());
+                holder.tvDistance1.setText(taskInfo.getSdistance());
             }
 //            if (taskInfo.getState().equals("1")&&(!taskInfo.getIshire().equals("1"))) {
               if ("1".equals(taskInfo.getState())&&(!"1".equals(taskInfo.getIshire()))){
@@ -714,6 +717,10 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
             TextView tvPrice;
             @BindView(R.id.tv_left)
             TextView tvLeft;
+            @BindView(R.id.tv_right)
+            TextView tvRight;
+            @BindView(R.id.tv_distance1)
+            TextView tvDistance1;
             @BindView(R.id.tv_distance)
             TextView tvDistance;
             @BindView(R.id.tv_btn_grab)
@@ -731,4 +738,17 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
             return new SimpleDateFormat("MM-dd  HH:mm").format(date) + str;
         }
     }
+    public String getDistance(String lati,String longi) {
+        Double distance = DistanceUtil.getDistance(
+                new LatLng(Double.parseDouble(String.valueOf(HelperApplication.getInstance().mCurrentLocLat)),
+                        Double.parseDouble(String.valueOf(HelperApplication.getInstance().mCurrentLocLon))),
+                new LatLng(Double.parseDouble(lati),
+                        Double.parseDouble(longi)));
+        if (distance / 1000.0 > 1.0) {
+            return String.format("%.2f", distance / 1000.0) + "千米";
+        } else {
+            return String.format("%.2f", distance) + "米";
+        }
+    }
+
 }

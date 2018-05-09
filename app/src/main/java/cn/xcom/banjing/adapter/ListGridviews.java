@@ -69,9 +69,9 @@ public class ListGridviews extends BaseAdapter{
 //                        bundle.putSerializable("list111", (Serializable) list);
 //                        intent.putExtra("position",position);
 //                        intent.putExtras(bundle);
-//                        int[] location = new int[2];
-//                        intent.putExtra("locationX", location[1]);//必须
-//                        intent.putExtra("locationY", location[0]);//必须
+//                        int[] locationBase = new int[2];
+//                        intent.putExtra("locationX", locationBase[1]);//必须
+//                        intent.putExtra("locationY", locationBase[0]);//必须
 //                        intent.putExtra("width",viewHolder.imageView1.getWidth());//必须
 //                        intent.putExtra("height", viewHolder.imageView1.getHeight());//必须
 //                        context.startActivity(intent);

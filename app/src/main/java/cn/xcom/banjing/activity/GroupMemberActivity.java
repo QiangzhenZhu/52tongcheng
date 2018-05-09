@@ -141,7 +141,12 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                 getFriendList();
             }
         });
-        mAdapter = new GroupMemberListAdapter(friendLists, mContext);
+        mAdapter = new GroupMemberListAdapter(friendLists, mContext, new GroupMemberListAdapter.onGroupMemberChanger() {
+            @Override
+            public void onDeleteSuccess(int location) {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
         xRecyclerView.setAdapter(mAdapter);
         mAdapter.setRecyclerViewOnItemClickListener(new RecyclerViewOnItemLongClickListener() {
             @Override

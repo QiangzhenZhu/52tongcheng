@@ -97,10 +97,9 @@ public class ConvenienceAdapter extends RecyclerView.Adapter<ConvenienceAdapter.
         addList = new ArrayList<>();
         authenticationLists = new ArrayList<>();
         addList.clear();
-        if (convenience.getPic().size() > 0) {
-            for (int i = 0; i < convenience.getPic().size(); i++) {
-                addList.add(NetConstant.NET_DISPLAY_IMG + convenience.getPic().get(i).getPictureurl());
-            }
+        // TODO: 2018/4/18
+        if (!TextUtils.isEmpty(convenience.getPictureurl()) ) {
+                addList.add(NetConstant.NET_DISPLAY_IMG + convenience.getPictureurl());
 
             if (!convenience.getVideo().equals("")) {
                 adPosition=position;
@@ -180,7 +179,7 @@ public class ConvenienceAdapter extends RecyclerView.Adapter<ConvenienceAdapter.
             int likeCount = convenience.getLike().size();
             holder.tv_likecount.setText(likeCount+"");
         }
-        holder.tv_packet.setText(convenience.getRedpacket());
+        holder.tv_packet.setText(convenience.getRed_packet()+"");
         holder.iv_like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -188,7 +187,7 @@ public class ConvenienceAdapter extends RecyclerView.Adapter<ConvenienceAdapter.
             }
         });
         if (convenience.getTouchcount() !=null) {
-            holder.tv_redCount.setText(convenience.getTouchcount());
+            holder.tv_redCount.setText(convenience.getRed_balance()+"");
         }
         int soundTime = 0;
         if (!TextUtils.isEmpty(convenience.getSoundtime()))

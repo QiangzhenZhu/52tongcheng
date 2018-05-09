@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 import cn.xcom.banjing.R;
@@ -49,8 +50,14 @@ public class PointsAdapter extends RecyclerView.Adapter<PointsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ScoreList.DataBean.ScoreListBean score = scoreListBeans.get(position);
-        holder.mPointText.setText(score.getTitle()+ "   积分 +"+score.getScore());
-        Picasso.with(holder.itemView.getContext()).load(NetConstant.NET_HOST+"/"+score.getIcon_url()).into(holder.mItemIcom);
+        if ("1".equals(score.getType())) {
+            holder.mPointText.setText(score.getTitle() + "   积分 +" + score.getScore());
+        }else {
+            holder.mPointText.setText(score.getTitle() + "   积分 -" + score.getScore());
+
+        }
+        Picasso.with(holder.itemView.getContext()).load(NetConstant.NET_HOST + "/" + score.getIcon_url()).into(holder.mItemIcom);
+
     }
 
     @Override

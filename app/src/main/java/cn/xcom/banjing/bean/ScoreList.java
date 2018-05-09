@@ -64,11 +64,11 @@ public class ScoreList {
              * total_score : 290
              */
 
-            private int today_score;
+            private float today_score;
             private int today_task;
-            private int total_score;
+            private float total_score;
 
-            public int getToday_score() {
+            public float getToday_score() {
                 return today_score;
             }
 
@@ -84,7 +84,7 @@ public class ScoreList {
                 this.today_task = today_task;
             }
 
-            public int getTotal_score() {
+            public float getTotal_score() {
                 return total_score;
             }
 

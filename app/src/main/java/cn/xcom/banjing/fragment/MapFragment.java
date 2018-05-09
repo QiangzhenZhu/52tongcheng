@@ -60,6 +60,7 @@ import com.google.gson.reflect.TypeToken;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.yalantis.ucrop.util.LightStatusBarUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,6 +89,7 @@ import cn.xcom.banjing.activity.SaleActivity;
 import cn.xcom.banjing.activity.TaskActivity;
 import cn.xcom.banjing.bean.AuthenticationList;
 import cn.xcom.banjing.bean.UserInfo;
+import cn.xcom.banjing.chat.UploadImageUtils;
 import cn.xcom.banjing.constant.NetConstant;
 import cn.xcom.banjing.net.HelperAsyncHttpClient;
 import cn.xcom.banjing.utils.LogUtils;
@@ -143,6 +145,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
     String address = "";
     String count = "";
     LinearLayout mapLayout;
+    private Boolean isUploadLocation;
 
     @Nullable
     @Override
@@ -155,6 +158,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        isUploadLocation = false;
         mContext = getActivity();
         lists = new ArrayList<>();
         markers = new ArrayList<>();
@@ -238,6 +242,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
                 if (currentPt.longitude != 0 && currentPt.latitude != 0) {
                     mSearch.reverseGeoCode(new ReverseGeoCodeOption()
                             .location(currentPt));
+
                 }
                 Log.e("中心点", currentPt.latitude + "");
                 if (marker != null) {
@@ -357,7 +362,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
             MapStatusUpdate msu = MapStatusUpdateFactory.newLatLngZoom(currentPt, 18.0f);
             mBaiduMap.animateMapStatus(msu);
             /*mSearch.reverseGeoCode(new ReverseGeoCodeOption()
-                    .location(currentPt));
+                    .locationBase(currentPt));
             MapStatus mMapStatus = new MapStatus.Builder().target(currentPt).zoom(18.0f)
                     .build();
             MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory
@@ -455,7 +460,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
                 if (state.equals("1")) {
                     uploadLocation();
                 }else{
-                    goUploadLocation();
+                    //goUploadLocation();
                 }
             }
 
@@ -463,7 +468,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 super.onFailure(statusCode, headers, responseString, throwable);
                 LogUtils.e(TAG, responseString);
-                goUploadLocation();
+                //goUploadLocation();
             }
         });
     }
@@ -486,26 +491,29 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 super.onFailure(statusCode, headers, responseString, throwable);
                 LogUtils.e(TAG, responseString);
+
             }
         });
     }
     private void goUploadLocation() {
+        Log.e("BaiduLocationApiDem1", "upload location");
         RequestParams params = new RequestParams();
         params.put("userid", userInfo.getUserId());
         params.put("address", HelperApplication.getInstance().mLocAddress);
         params.put("longitude", HelperApplication.getInstance().mLocLon);
         params.put("latitude", HelperApplication.getInstance().mLocLat);
+        Log.e("uploadLocation", HelperApplication.getInstance().mLocAddress+"/"+HelperApplication.getInstance().mLocLon );
         HelperAsyncHttpClient.get(NetConstant.GO_UPLOAD_LOCATION, params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
-                Log.e(TAG, String.valueOf(response));
+                Log.e( "uploadLocation", String.valueOf(response));
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 super.onFailure(statusCode, headers, responseString, throwable);
-                LogUtils.e(TAG, responseString);
+                LogUtils.e("uploadLocation", responseString);
             }
         });
     }
@@ -520,8 +528,15 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
             }
         }
         markers.clear();
+        LatLng latLng;
         for (int i = 0; i < lists.size(); i++) {
-            LatLng latLng = new LatLng(Double.parseDouble(lists.get(i).getLatitude()), Double.parseDouble(lists.get(i).getLongitude()));
+            if (!TextUtils.isEmpty(lists.get(i).getLatitude())&&!TextUtils.isEmpty(lists.get(i).getLongitude())){
+                latLng = new LatLng(Double.parseDouble(lists.get(i).getLatitude()), Double.parseDouble(lists.get(i).getLongitude()));
+            }else {
+                latLng = new LatLng(Double.parseDouble("0"), Double.parseDouble("0"));
+
+            }
+
             //构建Marker图标
 //            BitmapDescriptor bitmap = BitmapDescriptorFactory
 //                    .fromResource(R.drawable.service_person);
@@ -721,6 +736,14 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
                 sb.append(location.getAddrStr());
                 sb.append("\ndescribe : ");
                 sb.append("gps定位成功");
+                HelperApplication.getInstance().mLocAddress = location.getAddrStr();
+                HelperApplication.getInstance().mLocLon = location.getLatitude();
+                HelperApplication.getInstance().mLocLat = location.getLongitude();
+                if (!isUploadLocation){
+                   goUploadLocation();
+                   isUploadLocation = true;
+                }
+
 
             } else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {// 网络定位结果
                 sb.append("\naddr : ");
@@ -730,6 +753,13 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
                 sb.append(location.getOperators());
                 sb.append("\ndescribe : ");
                 sb.append("网络定位成功");
+                HelperApplication.getInstance().mLocAddress = location.getAddrStr();
+                HelperApplication.getInstance().mLocLon = location.getLatitude();
+                HelperApplication.getInstance().mLocLat = location.getLongitude();
+                if (!isUploadLocation){
+                    goUploadLocation();
+                    isUploadLocation = true;
+                }
             } else if (location.getLocType() == BDLocation.TypeOffLineLocation) {// 离线定位结果
                 sb.append("\ndescribe : ");
                 sb.append("离线定位成功，离线定位结果也是有效的");
@@ -754,7 +784,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
                     sb.append(p.getId() + " " + p.getName() + " " + p.getRank());
                 }
             }
-            Log.i("BaiduLocationApiDem", sb.toString());
+            Log.i("BaiduLocationApiDem1", sb.toString());
             locData = new MyLocationData.Builder()
                     .accuracy(location.getRadius())
                     // 此处设置开发者获取到的方向信息，顺时针0-360
@@ -764,11 +794,13 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
 
             mLatitude = location.getLatitude();
             mLongtitude = location.getLongitude();
-            //currentLocPt = new LatLng(location.getLatitude(),location.getLongitude());
+            //currentLocPt = new LatLng(locationBase.getLatitude(),locationBase.getLongitude());
             HelperApplication.getInstance().mLocLat = location.getLatitude();
             HelperApplication.getInstance().mLocLon = location.getLongitude();
             HelperApplication.getInstance().mLocAddress = location.getCity() + location.getDistrict() + location.getPoiList().get(0).getName();
-
+            HelperApplication.getInstance().mProvince = location.getProvince();
+            HelperApplication.getInstance().mArea = location.getDistrict();
+            HelperApplication.getInstance().city = location.getCity();
             if (isFirstIn) {
                 LatLng ll = new LatLng(mLatitude, mLongtitude);
                 MapStatusUpdate msu = MapStatusUpdateFactory.newLatLngZoom(ll, 18.0f);
@@ -784,10 +816,10 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
             }
 //
 //
-//            HelperApplication.getInstance().mLocaddresscity = location.getCity();
-//            HelperApplication.getInstance().mDistrict = location.getDistrict();
+//            HelperApplication.getInstance().mLocaddresscity = locationBase.getCity();
+//            HelperApplication.getInstance().mDistrict = locationBase.getDistrict();
             getCityId();
-//            HelperApplication.getInstance().mLocaddressprovince = location.getProvince();
+//            HelperApplication.getInstance().mLocaddressprovince = locationBase.getProvince();
 //            Log.d("====mfmLocaddresscity", HelperApplication.getInstance().mLocaddresscity);
         }
     }
@@ -1063,7 +1095,8 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
     }
 
     private void getCityId() {
-        String url = NetConstant.CHECK_CITY;
+        // TODO: 2018/4/4 checkCity接口不好用， 暂时取消掉；
+       /* String url = NetConstant.CHECK_CITY;
         StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
@@ -1092,6 +1125,6 @@ public class MapFragment extends Fragment implements View.OnClickListener, OnGet
         });
         request.putValue("city", HelperApplication.getInstance().mDistrict);
 
-        SingleVolleyRequest.getInstance(getContext()).addToRequestQueue(request);
+        SingleVolleyRequest.getInstance(getContext()).addToRequestQueue(request);*/
     }
 }

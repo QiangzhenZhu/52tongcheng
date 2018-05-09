@@ -84,6 +84,7 @@ public class ReleaseActivity extends BaseActivity implements View.OnClickListene
     private LinearLayout divide;
     private EditText ed_price;
     private EditText ed_oldprice;
+    private EditText ed_count;
     private GridView gridView;
     private GridViewAdapter gridViewAdapter;
     private LinearLayout location, image_linearLayout;
@@ -145,6 +146,7 @@ public class ReleaseActivity extends BaseActivity implements View.OnClickListene
 
     private void initView() {
         info.readData(context);
+        ed_count = (EditText) findViewById(R.id.et_count);
         addImageList = new ArrayList();
         nameList = new ArrayList<>();
         photoWithPaths = new ArrayList<>();
@@ -275,7 +277,12 @@ public class ReleaseActivity extends BaseActivity implements View.OnClickListene
             Toast.makeText(this, "价格不能为空", Toast.LENGTH_SHORT).show();
             return;
         }
+        /*final String count = ed_count.getText().toString().trim();
+        if (TextUtils.isEmpty(count)) {
+            Toast.makeText(this, "库存数量不能为空", Toast.LENGTH_SHORT).show();
+            return;
 
+        }*/
         final String oldprice = ed_oldprice.getText().toString().trim();
         if (TextUtils.isEmpty(oldprice)) {
             Toast.makeText(this, "原价不能为空", Toast.LENGTH_SHORT).show();
@@ -375,6 +382,11 @@ public class ReleaseActivity extends BaseActivity implements View.OnClickListene
             Toast.makeText(this, "原价不能为空", Toast.LENGTH_SHORT).show();
             return;
         }
+        /*final String count = ed_count.getText().toString().trim();
+        if (TextUtils.isEmpty(count)) {
+            Toast.makeText(this, "库存数量不能为空", Toast.LENGTH_SHORT).show();
+            return;
+        }*/
         final String location = ed_location.getText().toString().trim();
         if (TextUtils.isEmpty(oldprice)) {
             Toast.makeText(this, "地址不能为空", Toast.LENGTH_SHORT).show();

@@ -5,22 +5,53 @@
     android:layout_height="match_parent"
     android:background="@color/colorMainBackground">
     <TextView
+        android:padding="12dp"
         android:id="@+id/tv1"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="由近到远"
-        android:textSize="16sp"
+        android:layout_height="wrap_content"
+        android:text="智能排序"
+        android:textSize="14sp"
         android:textColor="@color/text_black"
-        android:gravity="center"
+        android:layout_marginTop="1dp"
         android:background="@color/background_white"/>
     <TextView
+        android:padding="12dp"
         android:id="@+id/tv2"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="由远到近"
-        android:textSize="16sp"
+        android:layout_height="wrap_content"
+        android:text="时间最近"
+        android:textSize="14sp"
         android:textColor="@color/text_black"
-        android:gravity="center"
+        android:layout_marginTop="1dp"
+        android:background="@color/background_white"/>
+    <TextView
+        android:padding="12dp"
+        android:id="@+id/tv3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="赏金最高"
+        android:textSize="14sp"
+        android:textColor="@color/text_black"
+        android:layout_marginTop="1dp"
+        android:background="@color/background_white"/>
+    <TextView
+        android:padding="12dp"
+        android:id="@+id/tv4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="分享最多"
+        android:textSize="14sp"
+        android:textColor="@color/text_black"
+        android:layout_marginTop="1dp"
+        android:background="@color/background_white"/>
+    <TextView
+        android:padding="12dp"
+        android:id="@+id/tv5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="剩余赏金最高"
+        android:textSize="14sp"
+        android:textColor="@color/text_black"
         android:layout_marginTop="1dp"
         android:background="@color/background_white"/>
 </LinearLayout>

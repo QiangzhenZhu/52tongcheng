@@ -609,4 +609,44 @@ public interface NetConstant extends HelperConstant {
      *
      */
     String DELETE_FRIEND = NET_HOST_PREFIX + "a=deleteFriend";
+    /**
+     * 举报广告
+     */
+    String REPORT = NET_HOST_PREFIX + "a=report";
+
+    /**
+     * 获取地址列表
+     */
+    String LOCATION = NET_HOST_PREFIX+ "a=GetCityList&id=0";
+
+    /**
+     * 打赏接口
+     */
+    String REWARD = "http://banjing.xiaocool.net/index.php?g=apps&m=index&a=score_reward";
+
+    /**
+     * 获取积分
+     */
+    String INTE_POINTS = "http://banjing.xiaocool.net/index.php?g=apps&m=index&a=get_my_score&userid";
+
+    /**
+     * 获取广告列表："a=get_ad_list";
+     */
+    String GET_AD_LIST = NET_HOST_PREFIX + "a=getADList";
+
+
+    /**
+     * 获取红包设置
+     */
+    String GET_PUBLISH_AD_SETTING = NET_HOST_PREFIX+"a=getPublishADSetting";
+
+    /**
+     * 分享成功回调
+     */
+    String SHARE_SUCCESS = NET_HOST_PREFIX+ "a=shareSuccess";
+
+    /**
+     * 群聊删除好友接口
+     */
+    String Delete_Friend = NET_HOST_PREFIX+ "a=deleteFriend";
 }

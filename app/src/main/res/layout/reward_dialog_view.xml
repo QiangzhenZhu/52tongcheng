@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="#f3f3f3"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:background="#FFFFFF"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:orientation="vertical"
+        android:layout_marginTop="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="积分打赏"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+    <android.support.v7.widget.GridLayout
+        app:columnCount="3"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/grid_button_1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="5"
+            android:background="@drawable/bg_reward_button"
+            app:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            />
+        <Button
+            android:id="@+id/grid_button_2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="10"
+            app:layout_columnWeight="1"
+            android:background="@drawable/bg_reward_button"
+            android:layout_margin="4dp"
+            />
+        <Button
+            android:id="@+id/grid_button_3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="20"
+            app:layout_columnWeight="1"
+            android:background="@drawable/bg_reward_button"
+            android:layout_margin="4dp"
+
+            />
+        <Button
+            android:id="@+id/grid_button_4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="50"
+            app:layout_columnWeight="1"
+            android:background="@drawable/bg_reward_button"
+            android:layout_margin="4dp"
+
+            />
+        <Button
+            android:id="@+id/grid_button_5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="100"
+            app:layout_columnWeight="1"
+            android:background="@drawable/bg_reward_button"
+            android:layout_margin="4dp"
+
+            />
+        <EditText
+            android:id="@+id/grid_button_6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="自定义"
+            android:padding="11dp"
+            android:textColor="#FDB637"
+            app:layout_columnWeight="1"
+            android:background="@drawable/bg_reward_button"
+            android:layout_margin="4dp"
+            />
+    </android.support.v7.widget.GridLayout>
+    <TextView
+        android:textColor="#000000"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/tv_avaliable_scores"
+        android:text="@string/avaliable_scores"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Button
+        android:text="打赏"
+        android:background="@drawable/bg_reward_button"
+        android:id="@+id/btn_reward_dialog"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>

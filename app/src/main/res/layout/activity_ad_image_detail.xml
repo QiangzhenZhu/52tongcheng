@@ -197,6 +197,13 @@
                             android:layout_marginRight="16dp"
                             android:layout_toRightOf="@id/tv_username"
                             android:background="@drawable/convenience_call" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="举报"
+                            android:id="@+id/bt_report"
+                            android:layout_marginRight="8dp"
+                            />
 
                        <!-- <ImageView
                             android:id="@+id/convenience_phone"
@@ -313,6 +320,16 @@
                 android:textColor="@color/colorTextSale"
                 android:textSize="16sp" />
 
+            <Button
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:id="@+id/btn_reward"
+                android:text="打赏"
+                android:background="@drawable/bg_reward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -344,6 +361,7 @@
 
 
         </LinearLayout>
+
     </ScrollView>
     <!--<RelativeLayout-->
         <!--android:id="@+id/rl_bottom"-->

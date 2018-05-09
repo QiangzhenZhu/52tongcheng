@@ -47,6 +47,42 @@ public class Convenience implements Serializable {
     private String touchcount;
     private String balance;
     private String favorites_count;
+    private String pictureurl;
+    private CanTouchPacketBean canTouchPacketBean;
+    private double red_balance;
+    private double red_packet;
+
+    public double getRed_balance() {
+        return red_balance;
+    }
+
+    public void setRed_balance(double red_balance) {
+        this.red_balance = red_balance;
+    }
+
+    public double getRed_packet() {
+        return red_packet;
+    }
+
+    public void setRed_packet(double red_packet) {
+        this.red_packet = red_packet;
+    }
+
+    public CanTouchPacketBean getCanTouchPacketBean() {
+        return canTouchPacketBean;
+    }
+
+    public void setCanTouchPacketBean(CanTouchPacketBean canTouchPacketBean) {
+        this.canTouchPacketBean = canTouchPacketBean;
+    }
+
+    public String getPictureurl() {
+        return pictureurl;
+    }
+
+    public void setPictureurl(String pictureurl) {
+        this.pictureurl = pictureurl;
+    }
 
     public String getFavorites_count() {
         return favorites_count;
@@ -209,6 +245,31 @@ public class Convenience implements Serializable {
 
         public void setPictureurl(String pictureurl) {
             this.pictureurl = pictureurl;
+        }
+    }
+    public static class CanTouchPacketBean {
+        /**
+         * status : false
+         * reason : 红包已抢完
+         */
+
+        private boolean status;
+        private String reason;
+
+        public boolean isStatus() {
+            return status;
+        }
+
+        public void setStatus(boolean status) {
+            this.status = status;
+        }
+
+        public String getReason() {
+            return reason;
+        }
+
+        public void setReason(String reason) {
+            this.reason = reason;
         }
     }
 
