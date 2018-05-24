@@ -593,9 +593,9 @@ public interface NetConstant extends HelperConstant {
      */
     String BALANCE_PAY = "http://banjing.xiaocool.net/apps/index/BalanceNotify";
     /**
-     * 单个获取广告信息
+     * 单个获取广告信息http://banjing.xiaocool.net/apps/index/getbbspostById
      */
-    String GET_BBSADBYID="http://banjing.xiaocool.net/apps/index/getbbspostById";
+    String GET_BBSADBYID= NET_HOST_PREFIX + "a=getADInfoByID";
     /**
      * 获取红包设置
      */
@@ -649,4 +649,9 @@ public interface NetConstant extends HelperConstant {
      * 群聊删除好友接口
      */
     String Delete_Friend = NET_HOST_PREFIX+ "a=deleteFriend";
+
+    /**
+     * 取消点赞借口
+     */
+    String Reset_Like = NET_HOST_PREFIX + "a=resetLike";
 }

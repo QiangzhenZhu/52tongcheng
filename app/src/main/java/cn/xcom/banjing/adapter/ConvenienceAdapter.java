@@ -175,25 +175,25 @@ public class ConvenienceAdapter extends RecyclerView.Adapter<ConvenienceAdapter.
         });
         holder.iv_like.setVisibility(View.VISIBLE);
         //    holder.iv_shanchu.setVisibility(View.GONE);
-        if (convenience.getLike()!=null) {
-            int likeCount = convenience.getLike().size();
+        if (convenience.getLikeInfo().getCount()!=0) {
+            int likeCount = convenience.getLikeInfo().getCount();
             holder.tv_likecount.setText(likeCount+"");
         }
-        holder.tv_packet.setText(convenience.getRed_packet()+"");
+        holder.tv_packet.setText(convenience.getRedpacket().getRed_packet()+"");
         holder.iv_like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setHadLikePost(convenience,convenience.getLike().size(),holder);
+                setHadLikePost(convenience,convenience.getLikeInfo().getCount(),holder);
             }
         });
-        if (convenience.getTouchcount() !=null) {
-            holder.tv_redCount.setText(convenience.getRed_balance()+"");
+        if (convenience.getRedpacket().getRed_balance() != 0) {
+            holder.tv_redCount.setText(convenience.getRedpacket().getRed_balance()+"");
         }
         int soundTime = 0;
-        if (!TextUtils.isEmpty(convenience.getSoundtime()))
+        if (!TextUtils.isEmpty(convenience.getVideo()))
 
         {
-            soundTime = Integer.valueOf(convenience.getSoundtime());
+            //soundTime = Integer.valueOf(convenience.getVideo());
         }
 
     }

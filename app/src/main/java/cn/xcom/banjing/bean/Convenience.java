@@ -1,128 +1,38 @@
 package cn.xcom.banjing.bean;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Created by Administrator on 2016/9/25 0025.
  */
 public class Convenience implements Serializable {
-
     /**
-     * mid : 7
-     * type : 1
-     * userid : 607
-     * name :: 13905930087
-     * title  51郑
-     * phone : 13905930087
-     * content : 郑测试1609192253
-     * sound :
-     * create_time : 1474296846
-     * photo : avatar20160920104210.png
-     * pic : [{"pictureurl":"avatar2016:09:19:22:54:06:2540.png"}]
-     * like : []
-     * comment : []
-     * packettime ：
-     * redpacket ：
-     * balance :
+     * mid : 10055
+     * type : 12
+     * userid : 2987
+     * title :
+     * content : 爱无价，月月爱负离子卫生巾，一款男人女人都可以用的卫生巾，欢迎咨询
+     * video :
+     * create_time : 1524840398
+     * name : 小甜甜
+     * photo : yyy1001516602171080.jpg
+     * pictureurl : yyy51671524840397515.jpg
+     * likeInfo : {"liked":false,"count":0}
+     * redpacket : {"red_packet":0.98,"red_balance":0.41}
      */
 
     private String mid;
     private String type;
     private String userid;
-    private String name;
-    private String phone;
     private String title;
     private String content;
-    private String sound;
-    private long create_time;
-    private String photo;
-    private String soundtime;
     private String video;
-    private String packettime;
-    private String redpacket;
-    private String packetstate;
-    private String packetId;
-    private String packetcount;
-    private String touchcount;
-    private String balance;
-    private String favorites_count;
+    private String create_time;
+    private String name;
+    private String photo;
     private String pictureurl;
-    private CanTouchPacketBean canTouchPacketBean;
-    private double red_balance;
-    private double red_packet;
-
-    public double getRed_balance() {
-        return red_balance;
-    }
-
-    public void setRed_balance(double red_balance) {
-        this.red_balance = red_balance;
-    }
-
-    public double getRed_packet() {
-        return red_packet;
-    }
-
-    public void setRed_packet(double red_packet) {
-        this.red_packet = red_packet;
-    }
-
-    public CanTouchPacketBean getCanTouchPacketBean() {
-        return canTouchPacketBean;
-    }
-
-    public void setCanTouchPacketBean(CanTouchPacketBean canTouchPacketBean) {
-        this.canTouchPacketBean = canTouchPacketBean;
-    }
-
-    public String getPictureurl() {
-        return pictureurl;
-    }
-
-    public void setPictureurl(String pictureurl) {
-        this.pictureurl = pictureurl;
-    }
-
-    public String getFavorites_count() {
-        return favorites_count;
-    }
-
-    public void setFavorites_count(String favorites_count) {
-        this.favorites_count = favorites_count;
-    }
-
-    public String getBalance() {
-        return balance;
-    }
-
-    public void setBalance(String balance) {
-        this.balance = balance;
-    }
-
-    public String getPackettime() {
-        return packettime;
-    }
-
-    public void setPackettime(String packettime) {
-        this.packettime = packettime;
-    }
-
-    public String getRedpacket() {
-        return redpacket;
-    }
-
-    public void setRedpacket(String redpacket) {
-        this.redpacket = redpacket;
-    }
-
-    /**
-     * pictureurl : avatar2016:09:19:22:54:06:2540.png
-     */
-
-    private List<PicBean> pic;
-    private List<?> like;
-    private List<CommentInfo> comment;
+    private LikeInfoBean likeInfo;
+    private RedpacketBean redpacket;
 
     public String getMid() {
         return mid;
@@ -148,22 +58,6 @@ public class Convenience implements Serializable {
         this.userid = userid;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -180,20 +74,28 @@ public class Convenience implements Serializable {
         this.content = content;
     }
 
-    public String getSound() {
-        return sound;
+    public String getVideo() {
+        return video;
     }
 
-    public void setSound(String sound) {
-        this.sound = sound;
+    public void setVideo(String video) {
+        this.video = video;
     }
 
-    public long getCreate_time() {
+    public String getCreate_time() {
         return create_time;
     }
 
-    public void setCreate_time(long create_time) {
+    public void setCreate_time(String create_time) {
         this.create_time = create_time;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPhoto() {
@@ -204,112 +106,99 @@ public class Convenience implements Serializable {
         this.photo = photo;
     }
 
-    public List<PicBean> getPic() {
-        return pic;
+    public String getPictureurl() {
+        return pictureurl;
     }
 
-    public void setPic(List<PicBean> pic) {
-        this.pic = pic;
+    public void setPictureurl(String pictureurl) {
+        this.pictureurl = pictureurl;
     }
 
-    public List<?> getLike() {
-        return like;
+    public LikeInfoBean getLikeInfo() {
+        return likeInfo;
     }
 
-    public void setLike(List<?> like) {
-        this.like = like;
+    public void setLikeInfo(LikeInfoBean likeInfo) {
+        this.likeInfo = likeInfo;
     }
 
-    public List<CommentInfo> getComment() {
-        return comment;
+    public RedpacketBean getRedpacket() {
+        return redpacket;
     }
 
-    public void setComment(List<CommentInfo> comment) {
-        this.comment = comment;
+    public void setRedpacket(RedpacketBean redpacket) {
+        this.redpacket = redpacket;
     }
 
-    public String getSoundtime() {
-        return soundtime;
-    }
-
-    public void setSoundtime(String soundtime) {
-        this.soundtime = soundtime;
-    }
-
-    public static class PicBean implements Serializable{
-        private String pictureurl;
-
-        public String getPictureurl() {
-            return pictureurl;
-        }
-
-        public void setPictureurl(String pictureurl) {
-            this.pictureurl = pictureurl;
-        }
-    }
-    public static class CanTouchPacketBean {
+    public static class LikeInfoBean implements Serializable {
         /**
-         * status : false
-         * reason : 红包已抢完
+         * liked : false
+         * count : 0
          */
 
-        private boolean status;
-        private String reason;
+        private boolean liked;
+        private int count;
 
-        public boolean isStatus() {
-            return status;
+        public boolean isLiked() {
+            return liked;
         }
 
-        public void setStatus(boolean status) {
-            this.status = status;
+        public void setLiked(boolean liked) {
+            this.liked = liked;
         }
 
-        public String getReason() {
-            return reason;
+        public int getCount() {
+            return count;
         }
 
-        public void setReason(String reason) {
-            this.reason = reason;
+        public void setCount(int count) {
+            this.count = count;
         }
     }
 
-    public String getVideo() {
-        return video;
+    public static class RedpacketBean implements  Serializable {
+        /**
+         * red_packet : 0.98
+         * red_balance : 0.41
+         */
+
+        private double red_packet;
+        private double red_balance;
+
+        public double getRed_packet() {
+            return red_packet;
+        }
+
+        public void setRed_packet(double red_packet) {
+            this.red_packet = red_packet;
+        }
+
+        public double getRed_balance() {
+            return red_balance;
+        }
+
+        public void setRed_balance(double red_balance) {
+            this.red_balance = red_balance;
+        }
     }
 
-    public void setVideo(String video) {
-        this.video = video;
-    }
 
-    public String getPacketstate() {
-        return packetstate;
-    }
-
-    public void setPacketstate(String packetstate) {
-        this.packetstate = packetstate;
-    }
-
-    public String getPacketId() {
-        return packetId;
-    }
-
-    public void setPacketId(String packetId) {
-        this.packetId = packetId;
-    }
-
-    public String getPacketcount() {
-        return packetcount;
-    }
-
-    public void setPacketcount(String packetcount) {
-        this.packetcount = packetcount;
-    }
-
-    public String getTouchcount() {
-        return touchcount;
-    }
-
-    public void setTouchcount(String touchcount) {
-        this.touchcount = touchcount;
-    }
+/**
+ * mid : 7
+ * type : 1
+ * userid : 607
+ * name :: 13905930087
+ * title  51郑
+ * phone : 13905930087
+ * content : 郑测试1609192253
+ * sound :
+ * create_time : 1474296846
+ * photo : avatar20160920104210.png
+ * pic : [{"pictureurl":"avatar2016:09:19:22:54:06:2540.png"}]
+ * like : []
+ * comment : []
+ * packettime ：
+ * redpacket ：
+ * balance :
+ */
 }

@@ -56,15 +56,16 @@ public class GroupMemberListAdapter extends RecyclerView.Adapter<GroupMemberList
     private RecyclerViewOnItemLongClickListener onItemLongClickListener;
     private UserInfo userInfo;
     private onGroupMemberChanger changer;
+    private String  chatId;
 
-    public GroupMemberListAdapter(List<FriendBean> friendLists, Context context,onGroupMemberChanger changer) {
+    public GroupMemberListAdapter(List<FriendBean> friendLists, Context context,onGroupMemberChanger changer,String chatId) {
         this.list = friendLists;
         this.context = context;
         states = new HashMap<>();
         userInfo = new UserInfo(context);
         userInfo.readData(context);
         this.changer = changer;
-
+        this.chatId = chatId;
     }
 
     @Override
@@ -88,7 +89,6 @@ public class GroupMemberListAdapter extends RecyclerView.Adapter<GroupMemberList
         if(list.get(position).getPhoto()!=null){
             MyImageLoader.display(NetConstant.NET_DISPLAY_IMG + list.get(position).getPhoto(), holder.iv_avatar);
         }
-
         holder.tv_name.setText(list.get(position).getName());
 
         holder.ll.setTag(list.get(position));
@@ -99,7 +99,7 @@ public class GroupMemberListAdapter extends RecyclerView.Adapter<GroupMemberList
                 final AlertView mAlertView = new AlertView("警告","确定要将该好友踢出群聊吗？",  "取消", new String[]{"确定"}, null, context, AlertView.Style.Alert, new OnItemClickListener() {
                     @Override
                     public void onItemClick(Object o, int po) {
-                        deleteFriend(context,userInfo.getUserId(),list.get(position).getId(),position);
+                        deleteFriend(context,list.get(position).getId(),chatId,position);
                     }
                 }).setCancelable(true).setOnDismissListener(new OnDismissListener() {
                     @Override
@@ -139,12 +139,20 @@ public class GroupMemberListAdapter extends RecyclerView.Adapter<GroupMemberList
 
     }
 
-    public void deleteFriend(final Context context, String userid, String friendId, final int location){
+    /**
+     * 将好友提出群聊
+     * @param context
+     * @param userid 被提出群聊的人
+     * @param
+     * @param location
+     */
+
+    public void deleteFriend(final Context context, String userid, String chatid, final int location){
         RequestParams requestParams = new RequestParams();
         requestParams.put("userid", userid);
-        requestParams.put("friend_userid",friendId);
+        requestParams.put("chatid",chatid);
 
-        HelperAsyncHttpClient.get(NetConstant.DELETE_FRIEND, requestParams,
+        HelperAsyncHttpClient.get(NetConstant.EXIT_GROUP, requestParams,
                 new JsonHttpResponseHandler() {
 
                     @Override

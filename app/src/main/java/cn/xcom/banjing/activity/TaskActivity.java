@@ -135,8 +135,7 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
 //        mContext = getActivity();
 //        taskInfos = new ArrayList<>();
 //        mLocClient = new LocationClient(mContext);     //声明LocationClient类
-//        mLocClient.registerLocationListener(myListener);    //注册监听函数
-//        initLocation();
+//        mLocClient.registerLocationListener(myListener);
 //        initView();
 //    }
 
@@ -165,7 +164,7 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
         xRecyclerView.setLoadingListener(new XRecyclerView.LoadingListener() {
             @Override
             public void onRefresh() {
-                getData(HelperApplication.getInstance().mDistrict);
+                getData(HelperApplication.getInstance().mDistrict,String.valueOf(HelperApplication.getInstance().mLocLon),String.valueOf(HelperApplication.getInstance().mLocLat));
             }
 
             @Override
@@ -184,7 +183,7 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
         super.onResume();
         userInfo.readData(mContext);
         if (!isFirstIn) {
-            getData(HelperApplication.getInstance().mDistrict);
+            getData(HelperApplication.getInstance().mDistrict,String.valueOf(HelperApplication.getInstance().mLocLon),String.valueOf(HelperApplication.getInstance().mLocLat));
         }
         //getIdentity();
     }
@@ -218,13 +217,15 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
     /**
      * 加载数据
      */
-    private void getData(String district) {
+    private void getData(String district,String longitude,String latitude ) {
         getWorkingState();
         RequestParams params = new RequestParams();
         params.put("city", district);
         Log.e("city", HelperApplication.getInstance().mDistrict);
         //params.put("city","芝罘区");
         params.put("userid", userInfo.getUserId());
+        params.put("longitude",longitude);
+        params.put("latitude",latitude);
         params.put("beginid", "0");
 
         HelperAsyncHttpClient.get(NetConstant.GETTASKLIST, params, new JsonHttpResponseHandler() {
@@ -506,7 +507,7 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
                 super.onSuccess(statusCode, headers, response);
                 if (response.optString("status").equals("success")) {
                     ToastUtil.showShort(mContext, "抢单");
-                    getData(HelperApplication.getInstance().mDistrict);
+                    getData(HelperApplication.getInstance().mDistrict,String.valueOf(HelperApplication.getInstance().mLocLon),String.valueOf(HelperApplication.getInstance().mLocLat));
                 }
             }
 
@@ -576,7 +577,7 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
                 mLocClient.stop();
                 if (isFirstIn) {
                     isFirstIn = false;
-                    getData(district);
+                    getData(district,String.valueOf(HelperApplication.getInstance().mLocLon),String.valueOf(HelperApplication.getInstance().mLocLat));
                 }
             }
         }
@@ -623,8 +624,8 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
             }
             holder.tvPrice.setText(taskInfo.getPrice());
             if (!taskInfo.getLongitude().equals("") && !taskInfo.getLatitude().equals("") && !taskInfo.getSlatitude().equals("") && !taskInfo.getSlongitude().equals("")) {
-                holder.tvDistance.setText(taskInfo.getDistance());
-                holder.tvDistance1.setText(taskInfo.getSdistance());
+                holder.tvDistance.setText(getDistance(taskInfo.getDistance()));
+                holder.tvDistance1.setText(getDistance(taskInfo.getDistance()));
             }
 //            if (taskInfo.getState().equals("1")&&(!taskInfo.getIshire().equals("1"))) {
               if ("1".equals(taskInfo.getState())&&(!"1".equals(taskInfo.getIshire()))){
@@ -738,12 +739,8 @@ public class TaskActivity extends BaseActivity implements View.OnClickListener {
             return new SimpleDateFormat("MM-dd  HH:mm").format(date) + str;
         }
     }
-    public String getDistance(String lati,String longi) {
-        Double distance = DistanceUtil.getDistance(
-                new LatLng(Double.parseDouble(String.valueOf(HelperApplication.getInstance().mCurrentLocLat)),
-                        Double.parseDouble(String.valueOf(HelperApplication.getInstance().mCurrentLocLon))),
-                new LatLng(Double.parseDouble(lati),
-                        Double.parseDouble(longi)));
+    public String getDistance(String dis) {
+        double distance = Double.valueOf(dis);
         if (distance / 1000.0 > 1.0) {
             return String.format("%.2f", distance / 1000.0) + "千米";
         } else {

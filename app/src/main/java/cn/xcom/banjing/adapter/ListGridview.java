@@ -62,7 +62,8 @@ public class ListGridview extends BaseAdapter{
             viewHolder= (ViewHolder) convertView.getTag();
         }
         if (!convenience.getVideo().equals("")) {
-            if (position == convenience.getPic().size() - 1) {
+            // TODO: 2018/5/9   
+            /*if (position == convenience.getPic().size() - 1) {
                 img.setImageResource(R.drawable.ic_bofang);
                 img.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 MyImageLoader.displayBg(list.get(position),viewHolder.imageView1);
@@ -70,7 +71,7 @@ public class ListGridview extends BaseAdapter{
             }else {
                 MyImageLoader.display(list.get(position),viewHolder.imageView1);
 
-            }
+            }*/
         }else {
             MyImageLoader.display(list.get(position),viewHolder.imageView1);
         }

@@ -14,6 +14,7 @@ import java.util.List;
 
 import cn.xcom.banjing.R;
 import cn.xcom.banjing.bean.CommentInfo;
+import cn.xcom.banjing.bean.ConvenienceAd;
 import cn.xcom.banjing.constant.NetConstant;
 import cn.xcom.banjing.utils.MyImageLoader;
 import cn.xcom.banjing.utils.RoundImageView;
@@ -30,7 +31,7 @@ public class AdCommentListAdapter extends RecyclerView.Adapter<AdCommentListAdap
             private TextView sendTimeText;
             private TextView contentText;
             RoundImageView profileRoundImageView;
-            private CommentInfo info;
+            private ConvenienceAd.CommentBean info;
             public AdCommentViewHolder(View itemView) {
                 super(itemView);
                 userNameText= (TextView) itemView.findViewById(R.id.tv_chat_item_username);
@@ -38,7 +39,7 @@ public class AdCommentListAdapter extends RecyclerView.Adapter<AdCommentListAdap
                 contentText= (TextView) itemView.findViewById(R.id.tv_chat_item_chatcontent);
                 profileRoundImageView= (RoundImageView) itemView.findViewById(R.id.riv_chat_item_profile);
             }
-            public void bind(CommentInfo info){
+            public void bind(ConvenienceAd.CommentBean info){
                 this.info=info;
                 userNameText.setText(info.getName());
                 Long longTime=Long.valueOf(info.getAdd_time());
@@ -52,9 +53,9 @@ public class AdCommentListAdapter extends RecyclerView.Adapter<AdCommentListAdap
 
 
 
-        List<CommentInfo> commentInfos;
+        List<ConvenienceAd.CommentBean> commentInfos;
 
-       public AdCommentListAdapter(List<CommentInfo> commentInfos) {
+       public AdCommentListAdapter(List<ConvenienceAd.CommentBean> commentInfos) {
            this.commentInfos = commentInfos;
        }
 
@@ -72,7 +73,7 @@ public class AdCommentListAdapter extends RecyclerView.Adapter<AdCommentListAdap
 
        @Override
        public void onBindViewHolder(AdCommentViewHolder holder, int position) {
-            CommentInfo info=commentInfos.get(position);
+            ConvenienceAd.CommentBean info=commentInfos.get(position);
             holder.bind(info);
        }
 

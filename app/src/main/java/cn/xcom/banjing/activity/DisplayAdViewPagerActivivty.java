@@ -235,10 +235,7 @@ public class DisplayAdViewPagerActivivty extends BaseActivity {
         request.putValue("province",AdFragment.provenience);
         request.putValue("city",AdFragment.city);
         request.putValue("address",district);
-
-        request.putValue("sort_by_create_time",AdFragment.onlineType);
-        request.putValue("sort_by_bounty",AdFragment.moneyType);
-        request.putValue("sort_by_share_count",AdFragment.shareCount);
+        request.putValue("orderby",AdFragment.orderby);
         Log.d(TAG, "getDatas: type"+type +"/original_array_count :"+addList.size()+"sort_by_create_time :"+AdFragment.onlineType
                 +"sort_by_bounty :"+AdFragment.moneyType+"sort_by_share_count :"+AdFragment.shareCount);
         SingleVolleyRequest.getInstance(DisplayAdViewPagerActivivty.this).addToRequestQueue(request);

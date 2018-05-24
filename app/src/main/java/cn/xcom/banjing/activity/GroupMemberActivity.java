@@ -144,9 +144,9 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         mAdapter = new GroupMemberListAdapter(friendLists, mContext, new GroupMemberListAdapter.onGroupMemberChanger() {
             @Override
             public void onDeleteSuccess(int location) {
-                mAdapter.notifyDataSetChanged();
+                getFriendList();
             }
-        });
+        },groupId);
         xRecyclerView.setAdapter(mAdapter);
         mAdapter.setRecyclerViewOnItemClickListener(new RecyclerViewOnItemLongClickListener() {
             @Override

@@ -105,6 +105,7 @@ import cn.xcom.banjing.bean.ADInfo;
 import cn.xcom.banjing.bean.Collection;
 import cn.xcom.banjing.bean.CommentInfo;
 import cn.xcom.banjing.bean.Convenience;
+import cn.xcom.banjing.bean.ConvenienceAd;
 import cn.xcom.banjing.bean.UserInfo;
 import cn.xcom.banjing.constant.NetConstant;
 import cn.xcom.banjing.net.OkHttpUtils;
@@ -154,6 +155,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     private LinearLayout ll_down;
     private TextView down_time,tvContent,timetext,tv_username,tvRedpacket ,tvLikeText,tvPriase ;
     private Convenience AdInfo;
+    private ConvenienceAd convenienceAd;
     private LinearLayout rl_share;
     private RecyclerView chatAdRecycleView;
     private LinearLayout rl_comment ,rl_like;
@@ -171,7 +173,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     private ArrayList<String> bImgsList=new ArrayList<>();
     private PopupWindow commentPopupWindow;
     private AdCommentListAdapter adapter;
-    private List<CommentInfo> commentInfos;
+    private List<ConvenienceAd.CommentBean> commentInfos;
     //图片轮播的Url
     private ArrayList<String> imageUrls;
     private List<ImageView> imageViews;
@@ -281,14 +283,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         user_photo=(RoundImageView)view.findViewById(R.id.riv_userphoto);
         rl_top= (RelativeLayout) view.findViewById(R.id.tl_top);
         callPhone = (Button) view.findViewById(R.id.bt_ad_callPhone);
-        callPhone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("tel:"+AdInfo.getPhone()));
-                startActivity(intent);
-            }
-        });
+        btnlike = (ImageView) view.findViewById(R.id.iv_like);
         if (type == 1){
             viewPager.setVisibility(View.GONE);
             //layout_view_play.setVisibility(View.VISIBLE);
@@ -597,7 +592,8 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                 showPopFormBottom(v);
                 break;
             case R.id.ll_like:
-                setHadLikePost(AdInfo, AdInfo.getComment().size());
+                // TODO: 2018/5/9
+                setHadLikePost(convenienceAd,convenienceAd.getLikeInfo().getCount() );
                 break;
             case R.id.rl_chat:
                 showPopComment();
@@ -733,7 +729,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                         if (adapter == null){
                             adapter=new AdCommentListAdapter(commentInfos);
                         }
-                        CommentInfo info=new CommentInfo();
+                        ConvenienceAd.CommentBean info=new ConvenienceAd.CommentBean();
                         info.setContent(content);
                         info.setAdd_time(String.valueOf(new Date().getTime()));
                         info.setName(userInfo.getUserName());
@@ -808,7 +804,8 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
             }
         });
         request.putValue("userid", userInfo.getUserId());
-        request.putValue("packetid",AdInfo.getPacketId());
+        // TODO: 2018/5/9  
+        request.putValue("packetid",convenienceAd.getRedpacket().getPacket_id());
         SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
     }
 
@@ -882,8 +879,8 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                         flag = 1;
                         convenience_collection.setImageResource(R.drawable.collection_enabled);
                         Toast.makeText(mContext, "收藏成功", Toast.LENGTH_LONG).show();
-                        // TODO: 2018/3/22 去抖动
-                        trend_item_tv_collection.setText((Integer.parseInt(AdInfo.getFavorites_count())+1)+"");
+                        // TODO: 2018/5/9
+                        trend_item_tv_collection.setText(convenienceAd.getCollectionInfo().getCount()+1+"");
 
                     } else {
                         flag = 2;
@@ -1007,7 +1004,8 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                     if (status.equals("success")) {
                         flag = 2;
                         convenience_collection.setImageResource(R.drawable.collection_uneabled);
-                        trend_item_tv_collection.setText((Integer.parseInt(AdInfo.getFavorites_count()))+"");
+                        // TODO: 2018/5/9
+                        trend_item_tv_collection.setText(convenienceAd.getCollectionInfo().getCount()+"");
                         Toast.makeText(mContext, "取消收藏", Toast.LENGTH_LONG).show();
                         Log.d("===quxiao", "取消收藏成功");
                     } else {
@@ -1099,7 +1097,7 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
      * 点赞
      * @param convenience
      */
-    public  void SetLikePost(Convenience convenience , final int count){
+    public  void SetLikePost(ConvenienceAd convenience , final int count){
         String url = NetConstant.SETLIKE_POST;
 
         StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
@@ -1111,7 +1109,9 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                     if (status.equals("success")) {
                         ToastUtil.showShort(mContext, "点赞成功");
                         int likeCount=count+1;
+                        convenienceAd.getLikeInfo().setCount(likeCount);
                         tvLikeText.setText(likeCount+"");
+                        btnlike.setImageResource(R.drawable.ad_btn_praise_selected);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -1131,10 +1131,10 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
     }
 
     /**
-     * 先判断受否点赞过，没有点过赞再调用SetLikePost（）进行点赞；
+     * 先判断是否点赞过，没有点过赞再调用SetLikePost（）进行点赞；
      */
-    public  void setHadLikePost(final Convenience con,int count){
-        final Convenience convenience =con;
+    public  void setHadLikePost(final ConvenienceAd con,int count){
+        final ConvenienceAd convenience =con;
         String url = NetConstant.CHECK_HAD_LIKE;
         final int likeCount=count;
         StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
@@ -1148,9 +1148,10 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                         if (!"had".equals(isLike)){
                             SetLikePost(convenience,likeCount);
                         }else {
-                            Toast.makeText(mContext,"你已经点过赞了",Toast.LENGTH_SHORT).show();
+                            //todo
+                            resetLike(likeCount);
                         }
-                    }if (status.equals("error")&&"no".equals(jsonObject.getString("data"))){
+                    }else if (status.equals("error")&&"no".equals(jsonObject.getString("data"))){
                         SetLikePost(convenience,likeCount);
                     }
                 } catch (JSONException e) {
@@ -1199,6 +1200,43 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
         judgeIsCollection();
 
     }
+
+    //取消点赞
+    public void resetLike( int likeCount){
+        String url = NetConstant.Reset_Like;
+        final int count = likeCount;
+        StringPostRequest request = new StringPostRequest(url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    Log.d("==sou", s);
+                    String status = jsonObject.getString("status");
+                    if (status.equals("success")) {
+                        ToastUtil.showShort(mContext, "取消点赞");
+                        tvLikeText.setText((count-1)+"");
+                        convenienceAd.getLikeInfo().setCount((count-1));
+                        btnlike.setImageResource(R.mipmap.ad_btn_praise);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+
+            }
+        });
+        request.putValue("userid", userInfo.getUserId());
+        request.putValue("refid", AdInfo.getMid());
+        request.putValue("type", "1");
+        SingleVolleyRequest.getInstance(mContext).addToRequestQueue(request);
+    }
+
+
+
     private void getAdByMid(String mid) {
         Log.e("zcq", "getmore");
         hud.show();
@@ -1211,46 +1249,64 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                     String status = jsonObject.getString("status");
                     if (status.equals("success")) {
                         Gson gson =new Gson();
-                        AdInfo = gson.fromJson(jsonObject.getString("data"),Convenience.class);
-                        if (TextUtils.isEmpty(AdInfo.getBalance())) {
+                        convenienceAd = gson.fromJson(jsonObject.getString("data"),ConvenienceAd.class);
+                        // TODO: 2018/5/9
+                        callPhone.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setData(Uri.parse("tel:"+convenienceAd.getPhone()));
+                                startActivity(intent);
+                            }
+                        });
+
+                        // TODO: 2018/5/9
+                        if (TextUtils.isEmpty(String.valueOf(convenienceAd.getRedpacket().getRed_balance()))) {
                             tvPriase.setText("0");
                         }else {
-                            tvPriase.setText(AdInfo.getRed_balance()+"");
+                            tvPriase.setText(convenienceAd.getRedpacket().getRed_balance()+"");
                         }
-                        tvRedpacket.setText(AdInfo.getRed_packet()+"");
-                        tvLikeText.setText(AdInfo.getLike().size()+"");
+                        tvRedpacket.setText(convenienceAd.getRedpacket()+"");
+                        if (convenienceAd.getLikeInfo().isLiked()){
+                            btnlike.setImageResource(R.drawable.ad_btn_praise_selected);
+                        }else {
+                            btnlike.setImageResource(R.mipmap.ad_btn_praise);
+                        }
+                        tvLikeText.setText(convenienceAd.getLikeInfo().getCount()+"");
                         if (adapter != null){
                             adapter.notifyDataSetChanged();
                         }else {
-                            commentInfos = AdInfo.getComment();
+                            // TODO: 2018/5/9
+                            commentInfos = convenienceAd.getComment();
                             adapter = new AdCommentListAdapter(commentInfos);
                             chatAdRecycleView.setAdapter(adapter);
                         }
                         // TODO: 2018/4/18
-
-                        if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
+                        /*if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
 
                             commentInfos=  AdInfo.getComment();
                             adapter=new AdCommentListAdapter(commentInfos);
                             chatAdRecycleView.setAdapter(adapter);
-                        }
+                        }*/
                         tvContent.setText(AdInfo.getContent());
                         userphoto=AdInfo.getPhoto();
                         username=AdInfo.getName();
-                        if (TextUtils.isEmpty(AdInfo.getBalance())) {
-                            tvPriase.setText("0");
-                        }else {
-                            tvPriase.setText(AdInfo.getRed_balance()+"");
-                        }
+                        // TODO: 2018/5/9
+
+                        tvPriase.setText(convenienceAd.getRedpacket().getRed_balance()+"");
+
                         tv_username.setText(username);
-                        tvRedpacket.setText(AdInfo.getRed_packet()+"");
-                        tvLikeText.setText(AdInfo.getLike().size()+"");
-                        trend_item_tv_collection.setText((Integer.parseInt(AdInfo.getFavorites_count()))+"");
+                        // TODO: 2018/5/9
+                        tvRedpacket.setText(convenienceAd.getRedpacket().getRed_packet()+"");
+                        tvLikeText.setText(convenienceAd.getLikeInfo().getCount()+"");
+                        // TODO: 2018/5/9
+                        trend_item_tv_collection.setText(convenienceAd.getCollectionInfo().getCount()+"");
                         MyImageLoader.display(NetConstant.NET_DISPLAY_IMG + userphoto, user_photo);
                         imageUrls=new ArrayList<>();
                         imageViews=new ArrayList<>();
-                        for (int i = 0; i <AdInfo.getPic().size() ; i++) {
-                            String imageUrl=AdInfo.getPic().get(i).getPictureurl();
+                        // TODO: 2018/5/9
+                        for (int i = 0; i <convenienceAd.getPictureList().size(); i++) {
+                            String imageUrl=convenienceAd.getPictureList().get(i);
                             imageUrls.add(NetConstant.NET_DISPLAY_IMG + imageUrl);
                             ImageView imageView=new ImageView(mContext);
                             Bitmap bmap = imageView.getDrawingCache();
@@ -1269,8 +1325,9 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
                             if (!isFirstIn) {
                                 isFirstIn = true;
                                 int time = 9000;
-                                if (!TextUtils.isEmpty(AdInfo.getPackettime())) {
-                                    time = Integer.parseInt(AdInfo.getPackettime()) * 1000;
+                                // TODO: 2018/5/9  红包时间
+                                if (convenienceAd.getRedpacket().getPackettime()!=0) {
+                                    time = convenienceAd.getRedpacket().getPackettime() * 1000;
                                 } else {
                                     time = 9000;
                                 }
@@ -1283,16 +1340,17 @@ public class DisplayAdFragment extends Fragment implements View.OnClickListener{
 
                                     @Override
                                     public void onFinish() {
-                                        timetext.setVisibility(View.GONE);
-                                        //没有红包则不抢
-                                        if ("0".equals(AdInfo.getRedpacket())) {
-                                            down_time.setText("");
-                                        } else {
-                                            touchPacket();
-                                        }
+                                        //timetext.setVisibility(View.GONE);
+                                        touchPacket();
+
                                     }
                                 };
-                                timer.start();
+                                if (convenienceAd.getRedpacket().getCan_touch_packet().isStatus()){
+                                    timer.start();
+                                }else {
+                                    Toast.makeText(mContext,convenienceAd.getRedpacket().getCan_touch_packet().getReason(),Toast.LENGTH_SHORT).show();
+                                    ll_down.setVisibility(View.GONE);
+                                }
                             }
                         }
                     }else{

@@ -176,7 +176,8 @@ public class DisplayAdvertisingActivity extends BaseActivity implements View.OnC
         AdInfo= (Convenience) getIntent().getSerializableExtra("adinfo");
         chatAdRecycleView= (RecyclerView) findViewById(R.id.rv_ad_chat);
         if(AdInfo!=null){
-            if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
+            // TODO: 2018/5/9
+            /*if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
                 LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
                 linearLayoutManager.setReverseLayout(true);
                 linearLayoutManager.setStackFromEnd(true);
@@ -184,23 +185,23 @@ public class DisplayAdvertisingActivity extends BaseActivity implements View.OnC
                 commentInfos=  AdInfo.getComment();
                 adapter=new AdCommentListAdapter(commentInfos);
                 chatAdRecycleView.setAdapter(adapter);
-            }
+            }*/
             tvContent.setText(AdInfo.getContent());
             userphoto=AdInfo.getPhoto();
             username=AdInfo.getName();
-            if ("".equals(AdInfo.getTouchcount())) {
+            if ("".equals(AdInfo.getRedpacket())) {
                 tvPriase.setText("0");
             }else {
-                tvPriase.setText(AdInfo.getTouchcount());
+                tvPriase.setText(AdInfo.getRedpacket()+"");
             }
             tv_username.setText(username);
-            tvRedpacket.setText(AdInfo.getRedpacket());
-            tvLikeText.setText(AdInfo.getLike().size()+"");
+            tvRedpacket.setText(AdInfo.getRedpacket().getRed_packet()+"");
+            tvLikeText.setText(AdInfo.getLikeInfo().getCount()+"");
             MyImageLoader.display(NetConstant.NET_DISPLAY_IMG + userphoto, user_photo);
             imageUrls=new ArrayList<>();
             imageViews=new ArrayList<>();
-            for (int i = 0; i <AdInfo.getPic().size() ; i++) {
-                String imageUrl=AdInfo.getPic().get(i).getPictureurl();
+            for (int i = 0; i <1 ; i++) {
+                String imageUrl=AdInfo.getPictureurl();
                 imageUrls.add(NetConstant.NET_DISPLAY_IMG + imageUrl);
                 ImageView imageView=new ImageView(context);
                 Bitmap bmap = imageView.getDrawingCache();
@@ -254,7 +255,7 @@ public class DisplayAdvertisingActivity extends BaseActivity implements View.OnC
                 showPopFormBottom(view);
                 break;
             case R.id.iv_like:
-                setHadLikePost(AdInfo,AdInfo.getComment().size());
+                //setHadLikePost(AdInfo,AdInfo.getComment().size());
                 break;
             case R.id.rl_chat:
                 showPopComment();
@@ -359,7 +360,7 @@ public class DisplayAdvertisingActivity extends BaseActivity implements View.OnC
                             commentInfos=new ArrayList<>();
                         }
                         if (adapter == null){
-                            adapter=new AdCommentListAdapter(commentInfos);
+                            /*adapter=new AdCommentListAdapter(commentInfos);*/
                         }
                         CommentInfo info=new CommentInfo();
                         info.setContent(content);
@@ -435,7 +436,7 @@ public class DisplayAdvertisingActivity extends BaseActivity implements View.OnC
             }
         });
         request.putValue("userid", userInfo.getUserId());
-        request.putValue("packetid",AdInfo.getPacketId());
+        //request.putValue("packetid",AdInfo.getPacketId());
         SingleVolleyRequest.getInstance(DisplayAdvertisingActivity.this).addToRequestQueue(request);
     }
 

@@ -77,6 +77,7 @@ import cn.xcom.banjing.adapter.ViewPageAdapter;
 import cn.xcom.banjing.bean.Collection;
 import cn.xcom.banjing.bean.CommentInfo;
 import cn.xcom.banjing.bean.Convenience;
+import cn.xcom.banjing.bean.ConvenienceAd;
 import cn.xcom.banjing.bean.UserInfo;
 import cn.xcom.banjing.constant.NetConstant;
 import cn.xcom.banjing.share.ShareHelper;
@@ -153,7 +154,7 @@ public class DisplayVideoAdvertisingActivity extends Activity implements OnClick
     private String content;
     private CommentPopupWindow commentPopupWindow;
     private AdCommentListAdapter adapter;
-    private List<CommentInfo> commentInfos;
+    private List<ConvenienceAd.CommentBean> commentInfos;
     private RecyclerView chatAdRecycleView;
     private TextView tvPriase, tvPacketCount;
     @Override
@@ -226,7 +227,7 @@ public class DisplayVideoAdvertisingActivity extends Activity implements OnClick
         viewPager= (ViewPager) findViewById(R.id.view_pager);
         rl_share = (LinearLayout) findViewById(R.id.rl_share);
         tvLikeText= (TextView) findViewById(R.id.trend_item_tv_like);
-        tvLikeText.setText(AdInfo.getLike().size()+"");
+        tvLikeText.setText(AdInfo.getLikeInfo()+"");
         rl_share.setOnClickListener(this);
         btnlike=(ImageView)findViewById(R.id.iv_like);
         btnlike.setOnClickListener(this);
@@ -235,10 +236,10 @@ public class DisplayVideoAdvertisingActivity extends Activity implements OnClick
         username=AdInfo.getName();
         tv_username.setText(username);
         tvPriase= (TextView) findViewById(R.id.trend_item_tv_praise);
-        tvPriase.setText(AdInfo.getTouchcount());
-        tvPacketCount.setText(AdInfo.getRedpacket());
+        tvPriase.setText(AdInfo.getRedpacket()+"");
+        //tvPacketCount.setText(AdInfo.getRedpacket());
         MyImageLoader.display(NetConstant.NET_DISPLAY_IMG + userphoto, user_photo);
-        if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
+        /*if (AdInfo.getComment()!=null&&AdInfo.getComment().size()>0){
             LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
             linearLayoutManager.setReverseLayout(true);
             linearLayoutManager.setStackFromEnd(true);
@@ -246,7 +247,7 @@ public class DisplayVideoAdvertisingActivity extends Activity implements OnClick
             commentInfos=  AdInfo.getComment();
             adapter=new AdCommentListAdapter(commentInfos);
             chatAdRecycleView.setAdapter(adapter);
-        }
+        }*/
         //解决未知布局嵌套的原因致使 ScrollView 滑到中部，现在滑动会顶部
         tv_username.setFocusable(true);
         tv_username.setFocusableInTouchMode(true);
@@ -369,7 +370,7 @@ public class DisplayVideoAdvertisingActivity extends Activity implements OnClick
                 showPopFormBottom(view);
                 break;
             case R.id.iv_like:
-                setHadLikePost(AdInfo,AdInfo.getComment().size());
+                //setHadLikePost(AdInfo,AdInfo.getComment().size());
                 break;
             case R.id.rl_chat_vedio:
                 showPopComment();
@@ -451,7 +452,7 @@ public class DisplayVideoAdvertisingActivity extends Activity implements OnClick
                         if (adapter == null){
                             adapter=new AdCommentListAdapter(commentInfos);
                         }
-                        CommentInfo info=new CommentInfo();
+                        ConvenienceAd.CommentBean info=new ConvenienceAd.CommentBean();
                         info.setContent(content);
                         info.setAdd_time(String.valueOf(new Date().getTime()));
                         info.setName(userInfo.getUserName());
@@ -524,7 +525,7 @@ public class DisplayVideoAdvertisingActivity extends Activity implements OnClick
             }
         });
         request.putValue("userid", userInfo.getUserId());
-        request.putValue("packetid",AdInfo.getPacketId());
+        //request.putValue("packetid",AdInfo.getPacketId());
         SingleVolleyRequest.getInstance(DisplayVideoAdvertisingActivity.this).addToRequestQueue(request);
     }
     /**
